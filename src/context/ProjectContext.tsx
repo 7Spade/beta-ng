@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { Project, Task, TaskStatus } from '@/lib/types';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, writeBatch, Timestamp } from "firebase/firestore";
