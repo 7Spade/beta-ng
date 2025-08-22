@@ -24,11 +24,16 @@ const PartnersPage: FC = () => {
   useEffect(() => {
     const fetchPartners = async () => {
       setIsLoading(true);
-      const partnersCollection = collection(db, 'partners');
-      const partnerSnapshot = await getDocs(partnersCollection);
-      const partnerList = partnerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Partner[];
-      setPartners(partnerList);
-      setIsLoading(false);
+      try {
+        const partnersCollection = collection(db, 'partners');
+        const partnerSnapshot = await getDocs(partnersCollection);
+        const partnerList = partnerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Partner[];
+        setPartners(partnerList);
+      } catch (error) {
+        console.error("Error fetching partners:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchPartners();
