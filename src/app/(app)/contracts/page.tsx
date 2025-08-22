@@ -11,6 +11,7 @@ import { Logo } from '@/components/layout/logo';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 // Helper function to convert Firestore Timestamps to Dates
 const processFirestoreContract = (doc: any): Contract => {
