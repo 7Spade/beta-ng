@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { Project, Task, TaskStatus } from '@/lib/types';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, writeBatch, Timestamp } from "firebase/firestore";
+import { collection, getDocs, doc, writeBatch, Timestamp, onSnapshot } from "firebase/firestore";
 
 interface ProjectContextType {
   projects: Project[];
@@ -58,8 +58,18 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
 
 
   useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
+    const projectsCollection = collection(db, 'projects');
+    const unsubscribe = onSnapshot(projectsCollection, (querySnapshot) => {
+        const projectsData = processFirestoreProjects(querySnapshot.docs);
+        setProjects(projectsData);
+        setLoading(false);
+    }, (error) => {
+        console.error("Error fetching projects with snapshot: ", error);
+        setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
 
   const findProject = useCallback((projectId: string) => {
@@ -67,16 +77,23 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
   }, [projects]);
   
   const addProject = async (project: Omit<Project, 'id' | 'tasks'>) => {
-    const batch = writeBatch(db);
-    const newProjectRef = doc(collection(db, "projects"));
-    
-    batch.set(newProjectRef, {
-        ...project,
-        tasks: [],
-    });
+    try {
+        const batch = writeBatch(db);
+        const newProjectRef = doc(collection(db, "projects"));
+        
+        const projectDataForFirestore = {
+            ...project,
+            startDate: Timestamp.fromDate(project.startDate),
+            endDate: Timestamp.fromDate(project.endDate),
+            tasks: [],
+        };
 
-    await batch.commit();
-    await fetchProjects(); // Refetch projects after adding
+        batch.set(newProjectRef, projectDataForFirestore);
+
+        await batch.commit();
+    } catch (error) {
+        console.error("Error adding project: ", error);
+    }
   };
 
   const updateTaskStatus = async (projectId: string, taskId: string, status: TaskStatus) => {
@@ -100,7 +117,6 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     const batch = writeBatch(db);
     batch.update(projectRef, { tasks: newTasks });
     await batch.commit();
-    await fetchProjects(); // Refetch projects after updating
   };
   
   const addTask = async (projectId: string, parentTaskId: string | null, taskTitle: string, quantity: number, unitPrice: number) => {
@@ -138,7 +154,6 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     const batch = writeBatch(db);
     batch.update(projectRef, { tasks: newTasks });
     await batch.commit();
-    await fetchProjects(); // Refetch projects after adding
   }
 
   return (
