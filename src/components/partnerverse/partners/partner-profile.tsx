@@ -129,13 +129,6 @@ export const PartnerProfile: FC<PartnerProfileProps> = ({ partner, userRole, onB
         fetchContracts();
     }, [partner.name]);
     
-    // Update local state when the partner prop changes
-    useEffect(() => {
-        setReceivableWorkflow(partner.receivableWorkflow || []);
-        setPayableWorkflow(partner.payableWorkflow || []);
-    }, [partner]);
-
-
     const handleSaveChanges = async () => {
         if (!partner.id) return;
         setIsSaving(true);
