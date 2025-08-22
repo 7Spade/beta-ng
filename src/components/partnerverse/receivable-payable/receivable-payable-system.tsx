@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, addDoc, updateDoc, Timestamp, onSnapshot, query, where, arrayUnion } from 'firebase/firestore';
+import { collection, getDocs, doc, addDoc, updateDoc, Timestamp, onSnapshot, query, where, getDoc } from 'firebase/firestore';
 import type { Partner, FinancialDocument, ReceivablePayableType, Contract, Transaction } from '@/lib/types';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -206,9 +206,11 @@ export const ReceivablePayableSystem: React.FC = () => {
         if (!document) return;
     
         const partner = partners.find(p => p.id === document.partnerId);
-        if (!partner) return;
+        if (!partner || !partner.id) return;
     
         const workflow = document.type === 'receivable' ? partner.receivableWorkflow : partner.payableWorkflow;
+        if (!workflow || workflow.length === 0) return;
+    
         const currentStepIndex = workflow.indexOf(document.currentStep);
     
         if (currentStepIndex >= workflow.length - 1) {
@@ -228,29 +230,33 @@ export const ReceivablePayableSystem: React.FC = () => {
                 history: updatedHistory,
             });
     
-            // Check if it's the final step
+            // Check if it's the final step to create a transaction
             if (currentStepIndex + 1 === workflow.length - 1) {
-                const partnerRef = doc(db, 'partners', document.partnerId);
-                const newTransaction: Omit<Transaction, 'id'> = {
+                const partnerRef = doc(db, 'partners', partner.id);
+                
+                // Fetch the latest partner data to avoid overwriting concurrent changes
+                const partnerSnap = await getDoc(partnerRef);
+                const currentPartnerData = partnerSnap.data() as Partner | undefined;
+                if (!currentPartnerData) throw new Error("找不到合作夥伴資料。");
+
+                const newTransaction: Transaction = {
+                    id: `txn-${Date.now()}`,
                     date: new Date().toISOString(),
                     amount: document.amount,
                     status: '已完成',
                     description: `${document.type === 'receivable' ? '應收款' : '應付款'}單據 #${document.id.substring(0, 5)} - ${document.description}`
                 };
     
-                // Firestore doesn't have a direct way to add to an array without a transaction
-                // and ensuring uniqueness of an object is complex client-side.
-                // A common pattern is to use arrayUnion, but it requires the exact object.
-                // For simplicity here, we'll read, update, and write.
-                // In a real-world scenario, a Cloud Function would be more robust.
-                const updatedTransactions = arrayUnion({
-                    id: `txn-${Date.now()}`, // Simple unique ID
-                    ...newTransaction
-                });
+                const updatedTransactions = [...(currentPartnerData.transactions || []), newTransaction];
     
                 await updateDoc(partnerRef, {
                     transactions: updatedTransactions
                 });
+
+                // Update local state to reflect the change immediately
+                setPartners(prevPartners => prevPartners.map(p => 
+                    p.id === partner.id ? { ...p, transactions: updatedTransactions } : p
+                ));
     
                 toast({ title: "交易已記錄", description: `一筆新的交易已新增至 ${partner.name} 的紀錄中。` });
             } else {

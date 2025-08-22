@@ -94,7 +94,13 @@ const WorkflowEditor: FC<{ title: string; steps: string[]; setSteps: (steps: str
 };
 
 
-export const PartnerProfile: FC<PartnerProfileProps> = ({ partner, userRole, onEdit, onUpdateWorkflows, onOpenContactForm, onDeleteContact }) => {
+export const PartnerProfile: FC<PartnerProfileProps> = ({ partner: initialPartner, userRole, onEdit, onUpdateWorkflows, onOpenContactForm, onDeleteContact }) => {
+    // Use local state for the partner to reflect transaction updates
+    const [partner, setPartner] = useState(initialPartner);
+    useEffect(() => {
+        setPartner(initialPartner);
+    }, [initialPartner]);
+
     const [receivableWorkflow, setReceivableWorkflow] = useState(partner.receivableWorkflow || []);
     const [payableWorkflow, setPayableWorkflow] = useState(partner.payableWorkflow || []);
     const [isSaving, setIsSaving] = useState(false);
