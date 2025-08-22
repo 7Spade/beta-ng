@@ -1,6 +1,6 @@
 "use server";
 
-import { extractWorkItems, type ExtractWorkItemsOutput } from '@/ai/flows/extract-work-items';
+import { extractWorkItems, type ExtractWorkItemsOutput } from '@/ai/flows/extract-work-items-flow';
 import { z } from 'zod';
 
 const actionInputSchema = z.object({

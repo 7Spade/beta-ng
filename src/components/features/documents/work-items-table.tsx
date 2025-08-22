@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import type { ExtractWorkItemsOutput } from '@/ai/flows/extract-work-items';
+import type { ExtractWorkItemsOutput } from '@/ai/flows/extract-work-items-flow';
 import { Badge } from '../../ui/badge';
 
 export type WorkItem = ExtractWorkItemsOutput['workItems'][0];
