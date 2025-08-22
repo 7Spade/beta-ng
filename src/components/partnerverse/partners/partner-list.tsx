@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, type FC } from 'react';
@@ -14,7 +15,7 @@ import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMe
 
 interface PartnerListProps {
   partners: Partner[];
-  onSelectPartner: (partner: Partner) => void;
+  onSelectPartner: (partnerId: string) => void;
   userRole: Role;
   onAddPartner: () => void;
 }
@@ -27,7 +28,7 @@ export const PartnerList: FC<PartnerListProps> = ({ partners, onSelectPartner, u
   const filteredPartners = useMemo(() => {
     return partners.filter(partner => {
       const searchMatch = partner.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          partner.overview.toLowerCase().includes(searchTerm.toLowerCase());
+                          (partner.overview || '').toLowerCase().includes(searchTerm.toLowerCase());
       const statusMatch = statusFilter === 'All' || partner.status === statusFilter;
       const categoryMatch = categoryFilter === 'All' || partner.category === categoryFilter;
       return searchMatch && statusMatch && categoryMatch;
@@ -86,7 +87,7 @@ export const PartnerList: FC<PartnerListProps> = ({ partners, onSelectPartner, u
         {filteredPartners.map(partner => (
           <Card 
             key={partner.id} 
-            onClick={() => onSelectPartner(partner)} 
+            onClick={() => onSelectPartner(partner.id!)} 
             className="cursor-pointer hover:shadow-lg hover:border-primary/50 transition-all duration-200 flex flex-col"
           >
             <CardHeader className="flex-grow">

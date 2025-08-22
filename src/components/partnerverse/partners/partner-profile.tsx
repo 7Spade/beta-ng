@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Globe, Edit, Users, DollarSign, Calendar, Star, FileText, ShieldCheck, FileWarning, FileX, Briefcase, Plus, Trash2, Save, GripVertical, MoreVertical, Loader2 } from 'lucide-react';
+import { Globe, Edit, Users, DollarSign, Calendar, Star, FileText, ShieldCheck, FileWarning, FileX, Briefcase, Plus, Trash2, Save, GripVertical, MoreVertical, Loader2, ArrowLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -94,13 +94,7 @@ const WorkflowEditor: FC<{ title: string; steps: string[]; setSteps: (steps: str
 };
 
 
-export const PartnerProfile: FC<PartnerProfileProps> = ({ partner: initialPartner, userRole, onEdit, onUpdateWorkflows, onOpenContactForm, onDeleteContact }) => {
-    // Use local state for the partner to reflect transaction updates
-    const [partner, setPartner] = useState(initialPartner);
-    useEffect(() => {
-        setPartner(initialPartner);
-    }, [initialPartner]);
-
+export const PartnerProfile: FC<PartnerProfileProps> = ({ partner, userRole, onBack, onEdit, onUpdateWorkflows, onOpenContactForm, onDeleteContact }) => {
     const [receivableWorkflow, setReceivableWorkflow] = useState(partner.receivableWorkflow || []);
     const [payableWorkflow, setPayableWorkflow] = useState(partner.payableWorkflow || []);
     const [isSaving, setIsSaving] = useState(false);
@@ -134,6 +128,12 @@ export const PartnerProfile: FC<PartnerProfileProps> = ({ partner: initialPartne
 
         fetchContracts();
     }, [partner.name]);
+    
+    // Update local state when the partner prop changes
+    useEffect(() => {
+        setReceivableWorkflow(partner.receivableWorkflow || []);
+        setPayableWorkflow(partner.payableWorkflow || []);
+    }, [partner]);
 
 
     const handleSaveChanges = async () => {
@@ -162,6 +162,10 @@ export const PartnerProfile: FC<PartnerProfileProps> = ({ partner: initialPartne
 
   return (
     <div className="space-y-6">
+       <Button variant="outline" onClick={onBack} className="mb-4">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          返回夥伴列表
+        </Button>
       <Card>
         <CardHeader className="flex flex-col md:flex-row gap-6 items-start">
             <Image src={partner.logoUrl} alt={`${partner.name} logo`} width={80} height={80} className="rounded-lg border" data-ai-hint="logo company" />
@@ -180,7 +184,7 @@ export const PartnerProfile: FC<PartnerProfileProps> = ({ partner: initialPartne
                     </a>
                      <span className="hidden md:inline">|</span>
                      <span className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" /> 加入於 {new Date(partner.joinDate).toLocaleDateString()}
+                        <Calendar className="h-4 w-4" /> 加入於 {formatDate(partner.joinDate)}
                     </span>
                 </div>
             </div>
@@ -227,7 +231,7 @@ export const PartnerProfile: FC<PartnerProfileProps> = ({ partner: initialPartne
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {partner.contacts.length > 0 ? partner.contacts.map(contact => (
+                            {partner.contacts && partner.contacts.length > 0 ? partner.contacts.map(contact => (
                                 <TableRow key={contact.id}>
                                     <TableCell className="font-medium">{contact.name}</TableCell>
                                     <TableCell>{contact.role}</TableCell>
@@ -309,7 +313,7 @@ export const PartnerProfile: FC<PartnerProfileProps> = ({ partner: initialPartne
               <CardDescription>{partner.name} 的績效歷史與備註。</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {partner.performanceReviews.length > 0 ? partner.performanceReviews.map(review => (
+              {partner.performanceReviews && partner.performanceReviews.length > 0 ? partner.performanceReviews.map(review => (
                 <div key={review.id} className="border-b pb-4 last:border-b-0">
                   <div className="flex justify-between items-center mb-2">
                     <RatingStars rating={review.rating} />
@@ -340,7 +344,7 @@ export const PartnerProfile: FC<PartnerProfileProps> = ({ partner: initialPartne
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {partner.complianceDocuments.length > 0 ? partner.complianceDocuments.map(doc => (
+                  {partner.complianceDocuments && partner.complianceDocuments.length > 0 ? partner.complianceDocuments.map(doc => (
                     <TableRow key={doc.id}>
                       <TableCell className="font-medium">{doc.name}</TableCell>
                       <TableCell className="flex items-center gap-2">
@@ -430,9 +434,9 @@ export const PartnerProfile: FC<PartnerProfileProps> = ({ partner: initialPartne
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {partner.transactions.length > 0 ? partner.transactions.map(tx => (
+                        {partner.transactions && partner.transactions.length > 0 ? partner.transactions.map(tx => (
                             <TableRow key={tx.id}>
-                                <TableCell>{new Date(tx.date).toLocaleDateString()}</TableCell>
+                                <TableCell>{formatDate(tx.date)}</TableCell>
                                 <TableCell className="font-medium">{tx.description}</TableCell>
                                 <TableCell className={transactionStatusColor(tx.status)}>{tx.status}</TableCell>
                                 <TableCell className="text-right">${tx.amount.toLocaleString()}</TableCell>
