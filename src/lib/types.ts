@@ -88,6 +88,15 @@ export interface Partner {
   payableWorkflow: string[];
 }
 
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+  avatarUrl?: string;
+}
+
 export type ReceivablePayableType = 'receivable' | 'payable';
 
 export interface FinancialDocument {
