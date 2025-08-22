@@ -16,7 +16,7 @@
 
 import { ProjectDashboard } from '@/components/app/dashboard/dashboard';
 import { ContractDashboard } from '@/components/contracts/dashboard/dashboard';
-import PartnerVerseDashboardPage from '@/app/(app)/partnerverse/dashboard/page';
+import PartnerVersePage from '@/app/(app)/partnerverse/page';
 import { Separator } from '@/components/ui/separator';
 
 export default function DashboardPage() {
@@ -38,7 +38,7 @@ export default function DashboardPage() {
 
       <section>
         <h2 className="text-2xl font-semibold tracking-tight mb-4">合作夥伴總覽</h2>
-        <PartnerVerseDashboardPage />
+        <PartnerVersePage />
       </section>
     </div>
   );

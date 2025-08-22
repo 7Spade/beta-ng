@@ -6,10 +6,12 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dashboard } from '@/components/partnerverse/dashboard/dashboard';
+import { useRouter } from 'next/navigation';
 
-const PartnerVerseDashboardPage: FC = () => {
+const PartnerVersePage: FC = () => {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchPartners = async () => {
@@ -30,8 +32,7 @@ const PartnerVerseDashboardPage: FC = () => {
   }, []);
 
   const handleNavigate = () => {
-    // This can be replaced with Next.js router navigation if needed
-    window.location.href = '/partnerverse/partners';
+    router.push('/partnerverse/partners');
   }
 
   if (isLoading) {
@@ -50,4 +51,4 @@ const PartnerVerseDashboardPage: FC = () => {
   return <Dashboard partners={partners} onViewPartners={handleNavigate} />;
 }
 
-export default PartnerVerseDashboardPage;
+export default PartnerVersePage;
