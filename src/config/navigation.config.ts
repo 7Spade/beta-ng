@@ -33,7 +33,7 @@
  * - 工具函數提供導航邏輯
  * 
  * @usage
- * ```typescript
+ * '''typescript
  * import { navigationConfig, findNavigationItemByPath } from '@/config/navigation.config'
  * 
  * // 獲取當前路徑對應的導航項目
@@ -41,7 +41,7 @@
  * 
  * // 檢查是否應該展開某個區段
  * const shouldExpand = shouldExpandSection('partnerverse', '/partnerverse/workflows')
- * ```
+ * '''
  */
 
 import {
