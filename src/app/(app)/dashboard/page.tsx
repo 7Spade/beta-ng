@@ -15,6 +15,7 @@
 'use client';
 
 import { ProjectDashboard } from '@/components/app/dashboard/dashboard';
+import { AiUsageLog } from '@/components/dashboard/ai-usage-log';
 import { ContractDashboard } from '@/components/contracts/dashboard/dashboard';
 import PartnerVersePage from '@/app/(app)/partnerverse/page';
 import { Separator } from '@/components/ui/separator';
@@ -39,6 +40,13 @@ export default function DashboardPage() {
       <section>
         <h2 className="text-2xl font-semibold tracking-tight mb-4">合作夥伴總覽</h2>
         <PartnerVersePage />
+      </section>
+
+      <Separator />
+
+       <section>
+        <h2 className="text-2xl font-semibold tracking-tight mb-4">AI 使用紀錄</h2>
+        <AiUsageLog />
       </section>
     </div>
   );
