@@ -126,6 +126,12 @@ export const navigationConfig: NavigationItem[] = [
         href: '/team',
         children: [
             {
+                id: 'schedule',
+                label: '排班表',
+                icon: CalendarDays,
+                href: '/team/schedule'
+            },
+            {
                 id: 'members',
                 label: '同伴列表',
                 icon: ClipboardList,
@@ -136,12 +142,6 @@ export const navigationConfig: NavigationItem[] = [
                 label: '技能清單',
                 icon: Wrench,
                 href: '/team/skills'
-            },
-            {
-                id: 'schedule',
-                label: '排班表',
-                icon: CalendarDays,
-                href: '/team/schedule'
             },
             {
                 id: 'knowledge-base',
