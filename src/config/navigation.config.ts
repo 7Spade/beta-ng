@@ -55,7 +55,8 @@ import {
     ClipboardList,
     CalendarDays,
     ArrowLeftRight,
-    Wrench
+    Wrench,
+    BookOpen
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -68,6 +69,12 @@ export interface NavigationItem {
 }
 
 export const navigationConfig: NavigationItem[] = [
+    {
+        id: 'documents',
+        label: '文件',
+        icon: FileText,
+        href: '/documents'
+    },
     {
         id: 'analytics',
         label: '分析',
@@ -91,12 +98,6 @@ export const navigationConfig: NavigationItem[] = [
         label: '合約',
         icon: Building2,
         href: '/contracts'
-    },
-    {
-        id: 'documents',
-        label: '文件',
-        icon: FileText,
-        href: '/documents'
     },
     {
         id: 'partnerverse',
@@ -141,7 +142,14 @@ export const navigationConfig: NavigationItem[] = [
                 label: '排班表',
                 icon: CalendarDays,
                 href: '/team/schedule'
-            }
+            },
+            {
+                id: 'knowledge-base',
+                label: '工法工序庫',
+                icon: BookOpen,
+                href: '/knowledge-base'
+            },
+        
         ]
     }
 ]
