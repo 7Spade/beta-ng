@@ -51,11 +51,11 @@ import {
     FileText,
     Users,
     BarChart3,
-    Workflow,
     Settings,
     ClipboardList,
     CalendarDays,
-    ArrowLeftRight
+    ArrowLeftRight,
+    Wrench
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -129,6 +129,12 @@ export const navigationConfig: NavigationItem[] = [
                 label: '同伴列表',
                 icon: ClipboardList,
                 href: '/team/members'
+            },
+            {
+                id: 'skills',
+                label: '技能清單',
+                icon: Wrench,
+                href: '/team/skills'
             },
             {
                 id: 'schedule',

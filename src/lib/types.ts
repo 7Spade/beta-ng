@@ -88,6 +88,12 @@ export interface Partner {
   payableWorkflow: string[];
 }
 
+export interface Skill {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 export interface TeamMember {
   id: string;
   name: string;
@@ -95,6 +101,7 @@ export interface TeamMember {
   email: string;
   phone: string;
   avatarUrl?: string;
+  skillIds?: string[];
 }
 
 export type ReceivablePayableType = 'receivable' | 'payable';
