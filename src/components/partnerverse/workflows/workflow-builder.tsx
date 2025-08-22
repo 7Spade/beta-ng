@@ -470,5 +470,3 @@ export const WorkflowBuilder: FC<WorkflowBuilderProps> = ({ partners }) => {
     </div>
   );
 };
-
-    
