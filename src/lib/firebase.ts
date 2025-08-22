@@ -11,7 +11,7 @@ const firebaseConfig = {
   "storageBucket": "ngbeta-learn.firebasestorage.app",
   "apiKey": "AIzaSyC-itgeQQShEcRda3Gj2ZC5ZUXtM6OUBV8",
   "authDomain": "ngbeta-learn.firebaseapp.com",
-  "measurementId": "G-B5TBVN0H3L",
+  "measurementId": "",
   "messagingSenderId": "240796632166"
 };
 
@@ -26,7 +26,7 @@ if (typeof window !== "undefined") {
     .then(({ initializeAppCheck, ReCaptchaV3Provider }) => {
       initializeAppCheck(app, {
         provider: new ReCaptchaV3Provider(
-          "6LfoH6ErAAAAAO9PNTdxPVgt4nAF6XKGgo99Ogcg"
+          "6Lcae64rAAAAAGN1IOyTBbbAleUQC2nFdb6pxx_0"
         ),
         isTokenAutoRefreshEnabled: true,
       });
