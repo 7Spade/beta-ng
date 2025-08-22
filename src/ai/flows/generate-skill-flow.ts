@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { logAiTokenUsage } from '@/services/logging.service';
 import { z } from 'zod';
 
 const GenerateSkillInputSchema = z.object({
@@ -51,14 +52,34 @@ const generateSkillFlow = ai.defineFlow(
     outputSchema: GenerateSkillOutputSchema,
   },
   async (input) => {
-    const result = await prompt(input);
-    const output = result.output;
-    if (!output) {
-      throw new Error('No output from AI');
+    let result;
+    try {
+        result = await prompt(input);
+        const output = result.output;
+        if (!output) {
+            throw new Error('No output from AI');
+        }
+
+        const totalTokens = result.usage?.totalTokens || 0;
+        await logAiTokenUsage({
+            flowName: 'generateSkillFlow',
+            totalTokens: totalTokens,
+            status: 'succeeded',
+        });
+
+        return {
+            skills: output.skills,
+            totalTokens: totalTokens,
+        };
+    } catch (error) {
+        const totalTokens = result?.usage?.totalTokens || 0;
+        await logAiTokenUsage({
+            flowName: 'generateSkillFlow',
+            totalTokens: totalTokens,
+            status: 'failed',
+            error: error instanceof Error ? error.message : 'Unknown error',
+        });
+        throw error;
     }
-    return {
-        skills: output.skills,
-        totalTokens: result.usage?.totalTokens || 0,
-    };
   }
 );

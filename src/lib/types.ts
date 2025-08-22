@@ -1,6 +1,7 @@
 
 
 
+
 export type TaskStatus = '待處理' | '進行中' | '已完成';
 
 export interface Task {
@@ -201,4 +202,14 @@ export interface KnowledgeBaseEntry {
   tags?: string[];
   createdAt: any; // Firestore Timestamp
   updatedAt: any; // Firestore Timestamp
+}
+
+export interface AiTokenLog {
+    id?: string;
+    flowName: string;
+    totalTokens: number;
+    status: 'succeeded' | 'failed';
+    timestamp: any; // Firestore Timestamp
+    userId?: string; // Optional: for future use with authentication
+    error?: string; // Optional: only if status is 'failed'
 }

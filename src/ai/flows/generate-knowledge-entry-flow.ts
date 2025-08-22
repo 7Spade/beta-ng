@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { logAiTokenUsage } from '@/services/logging.service';
 import { z } from 'zod';
 
 const GenerateKnowledgeEntryInputSchema = z.object({
@@ -50,14 +51,34 @@ const generateKnowledgeEntryFlow = ai.defineFlow(
     outputSchema: GenerateKnowledgeEntryOutputSchema,
   },
   async (input) => {
-    const result = await prompt(input);
-    const output = result.output;
-    if (!output) {
-        throw new Error('No output from AI');
+    let result;
+    try {
+        result = await prompt(input);
+        const output = result.output;
+        if (!output) {
+            throw new Error('No output from AI');
+        }
+
+        const totalTokens = result.usage?.totalTokens || 0;
+        await logAiTokenUsage({
+            flowName: 'generateKnowledgeEntryFlow',
+            totalTokens: totalTokens,
+            status: 'succeeded',
+        });
+
+        return {
+            ...output,
+            totalTokens: totalTokens,
+        };
+    } catch (error) {
+        const totalTokens = result?.usage?.totalTokens || 0;
+        await logAiTokenUsage({
+            flowName: 'generateKnowledgeEntryFlow',
+            totalTokens: totalTokens,
+            status: 'failed',
+            error: error instanceof Error ? error.message : 'Unknown error',
+        });
+        throw error;
     }
-    return {
-        ...output,
-        totalTokens: result.usage?.totalTokens || 0,
-    };
   }
 );

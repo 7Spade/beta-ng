@@ -9,6 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import { logAiTokenUsage } from '@/services/logging.service';
 import {z} from 'genkit';
 
 const ExtractWorkItemsInputSchema = z.object({
@@ -61,14 +62,34 @@ const extractWorkItemsFlow = ai.defineFlow(
     outputSchema: ExtractWorkItemsOutputSchema,
   },
   async input => {
-    const result = await extractWorkItemsPrompt(input);
-    const output = result.output;
-    if (!output) {
-      throw new Error('No output from AI');
+    let result;
+    try {
+      result = await extractWorkItemsPrompt(input);
+      const output = result.output;
+      if (!output) {
+        throw new Error('No output from AI');
+      }
+      
+      const totalTokens = result.usage?.totalTokens || 0;
+      await logAiTokenUsage({
+        flowName: 'extractWorkItemsFlow',
+        totalTokens: totalTokens,
+        status: 'succeeded',
+      });
+      
+      return {
+          workItems: output.workItems,
+          totalTokens: totalTokens,
+      };
+    } catch (error) {
+        const totalTokens = result?.usage?.totalTokens || 0;
+        await logAiTokenUsage({
+            flowName: 'extractWorkItemsFlow',
+            totalTokens: totalTokens,
+            status: 'failed',
+            error: error instanceof Error ? error.message : 'Unknown error',
+        });
+        throw error;
     }
-    return {
-        workItems: output.workItems,
-        totalTokens: result.usage?.totalTokens || 0,
-    };
   }
 );

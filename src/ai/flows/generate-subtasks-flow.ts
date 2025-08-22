@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { logAiTokenUsage } from '@/services/logging.service';
 import { z } from 'zod';
 
 const GenerateSubtasksInputSchema = z.object({
@@ -45,7 +46,31 @@ const generateSubtasksFlow = ai.defineFlow(
     outputSchema: GenerateSubtasksOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
-    return output!;
+    let result;
+    try {
+        result = await prompt(input);
+        const output = result.output;
+        if (!output) {
+          throw new Error('No output from AI');
+        }
+
+        const totalTokens = result.usage?.totalTokens || 0;
+        await logAiTokenUsage({
+            flowName: 'generateSubtasksFlow',
+            totalTokens: totalTokens,
+            status: 'succeeded',
+        });
+        
+        return output;
+    } catch(error) {
+        const totalTokens = result?.usage?.totalTokens || 0;
+        await logAiTokenUsage({
+            flowName: 'generateSubtasksFlow',
+            totalTokens: totalTokens,
+            status: 'failed',
+            error: error instanceof Error ? error.message : 'Unknown error',
+        });
+        throw error;
+    }
   }
 );

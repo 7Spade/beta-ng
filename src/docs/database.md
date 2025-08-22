@@ -156,6 +156,22 @@
 | `createdAt` | `Timestamp` | 條目的建立時間。                   |
 | `updatedAt` | `Timestamp` | 條目的最後更新時間。               |
 
+### 2.8. `aiTokenLogs`
+
+此集合儲存所有 Genkit AI 流程的 token 消耗紀錄。
+
+- **文件 ID**: 自動生成的唯一 ID (`string`)
+- **文件結構**:
+
+| 欄位        | 類型        | 描述                               |
+|-------------|-------------|------------------------------------|
+| `flowName`  | `string`    | 被呼叫的 Genkit 流程名稱。         |
+| `totalTokens` | `number`    | 該次操作消耗的總 token 數量。     |
+| `status`    | `string` ('succeeded', 'failed') | 操作的最終狀態。|
+| `timestamp` | `Timestamp` | 紀錄的建立時間。                   |
+| `userId`    | `string`    | (可選) 執行此操作的使用者 ID。     |
+| `error`     | `string`    | (可選) 如果狀態為 'failed'，記錄錯誤訊息。|
+
 
 ## 3. 數據完整性
 

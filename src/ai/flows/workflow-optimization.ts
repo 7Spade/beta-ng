@@ -1,4 +1,3 @@
-// WorkflowOptimization.ts
 'use server';
 
 /**
@@ -10,6 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import { logAiTokenUsage } from '@/services/logging.service';
 import {z} from 'genkit';
 
 const SuggestWorkflowOptimizationsInputSchema = z.object({
@@ -74,7 +74,29 @@ const suggestWorkflowOptimizationsFlow = ai.defineFlow(
     outputSchema: SuggestWorkflowOptimizationsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    let result;
+    try {
+        result = await prompt(input);
+        const output = result.output;
+        if (!output) {
+          throw new Error('No output from AI');
+        }
+
+        await logAiTokenUsage({
+            flowName: 'suggestWorkflowOptimizationsFlow',
+            totalTokens: result.usage?.totalTokens || 0,
+            status: 'succeeded',
+        });
+        
+        return output;
+    } catch (error) {
+        await logAiTokenUsage({
+            flowName: 'suggestWorkflowOptimizationsFlow',
+            totalTokens: result?.usage?.totalTokens || 0,
+            status: 'failed',
+            error: error instanceof Error ? error.message : 'Unknown error',
+        });
+        throw error;
+    }
   }
 );

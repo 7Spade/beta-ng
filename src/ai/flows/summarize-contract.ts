@@ -9,6 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import { logAiTokenUsage } from '@/services/logging.service';
 import {z} from 'genkit';
 
 const SummarizeContractInputSchema = z.object({
@@ -49,7 +50,29 @@ const summarizeContractFlow = ai.defineFlow(
     outputSchema: SummarizeContractOutputSchema,
   },
   async input => {
-    const {output} = await summarizeContractPrompt(input);
-    return output!;
+    let result;
+    try {
+      result = await summarizeContractPrompt(input);
+      const output = result.output;
+      if (!output) {
+        throw new Error('No output from AI');
+      }
+
+      await logAiTokenUsage({
+        flowName: 'summarizeContractFlow',
+        totalTokens: result.usage?.totalTokens || 0,
+        status: 'succeeded',
+      });
+      
+      return output;
+    } catch(error) {
+        await logAiTokenUsage({
+            flowName: 'summarizeContractFlow',
+            totalTokens: result?.usage?.totalTokens || 0,
+            status: 'failed',
+            error: error instanceof Error ? error.message : 'Unknown error',
+        });
+        throw error;
+    }
   }
 );
