@@ -100,6 +100,7 @@
 | 欄位           | 類型                | 描述                                       |
 |----------------|---------------------|--------------------------------------------|
 | `partnerId`    | `string`            | 關聯到的 `partners` 集合的文件 ID。        |
+| `partnerName`  | `string`            | 關聯夥伴的名稱，用於顯示。                 |
 | `contractId`   | `string`            | (可選) 關聯到的 `contracts` 集合的文件 ID。|
 | `contractName` | `string`            | (可選) 關聯合約的名稱，用於顯示。          |
 | `type`         | `string` ('receivable', 'payable') | 單據類型：應收或應付。|

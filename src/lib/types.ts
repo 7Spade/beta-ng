@@ -93,6 +93,7 @@ export type ReceivablePayableType = 'receivable' | 'payable';
 export interface FinancialDocument {
     id: string;
     partnerId: string;
+    partnerName: string;
     contractId?: string;
     contractName?: string;
     type: ReceivablePayableType;
