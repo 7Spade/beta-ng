@@ -1,11 +1,11 @@
 'use server';
 
 /**
- * @fileOverview This file defines a Genkit flow for summarizing contract terms and obligations using AI.
- *
- * - summarizeContract - An async function that takes a contract document (as a data URI) and returns a summary of its key terms, obligations, and deadlines.
- * - SummarizeContractInput - The input type for the summarizeContract function, which includes the contract document as a data URI.
- * - SummarizeContractOutput - The output type for the summarizeContract function, which is a string containing the contract summary.
+ * @fileOverview 合約摘要流程
+ * @description 此 AI 流程接收一份合約文件，並生成一份包含關鍵條款、義務和截止日期的簡潔摘要。
+ * @exports summarizeContract - 觸發合約摘要過程的函數。
+ * @exports SummarizeContractInput - summarizeContract 函數的輸入類型。
+ * @exports SummarizeContractOutput - summarizeContract 函數的返回類型。
  */
 
 import {ai} from '@/ai/genkit';

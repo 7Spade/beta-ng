@@ -1,11 +1,11 @@
 'use server';
 
 /**
- * @fileOverview This file defines a Genkit flow for extracting work items, quantities, prices, and unit prices from documents.
- *
- * - extractWorkItems - A function that triggers the data extraction process.
- * - ExtractWorkItemsInput - The input type for the extractWorkItems function.
- * - ExtractWorkItemsOutput - The return type for the extractWorkItems function.
+ * @fileOverview 檔案提取流程 - 從文件中提取結構化的工料項目。
+ * @description 此流程使用 AI 從上傳的文件（如報價單、合約）中解析並提取工作項目、數量、單價和總價。
+ * @exports extractWorkItems - 觸發數據提取過程的函數。
+ * @exports ExtractWorkItemsInput - extractWorkItems 函數的輸入類型。
+ * @exports ExtractWorkItemsOutput - extractWorkItems 函數的返回類型。
  */
 
 import {ai} from '@/ai/genkit';

@@ -1,10 +1,11 @@
 'use server';
+
 /**
- * @fileOverview An AI agent for generating skill suggestions for team members.
- *
- * - generateSkillSuggestion - A function that generates skill suggestions.
- * - GenerateSkillInput - The input type for the function.
- * - GenerateSkillOutput - The return type for the function.
+ * @fileOverview 技能建議生成流程
+ * @description 此 AI 流程根據使用者提供的職位或主題（如「水電工」），建議 3 到 5 個相關的技能及其描述。
+ * @exports generateSkillSuggestion - 觸發技能建議生成過程的函數。
+ * @exports GenerateSkillInput - generateSkillSuggestion 函數的輸入類型。
+ * @exports GenerateSkillOutput - generateSkillSuggestion 函數的返回類型。
  */
 
 import { ai } from '@/ai/genkit';

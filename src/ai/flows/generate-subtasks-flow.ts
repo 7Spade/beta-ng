@@ -1,10 +1,11 @@
 'use server';
+
 /**
- * @fileOverview An AI agent for generating sub-tasks for a construction project task.
- *
- * - generateSubtasks - A function that generates sub-task suggestions.
- * - GenerateSubtasksInput - The input type for the generateSubtasks function.
- * - GenerateSubtasksOutput - The return type for the generateSubtasks function.
+ * @fileOverview 子任務建議生成流程
+ * @description 此 AI 流程基於專案主標題和母任務標題，為使用者生成 3 到 5 個可行的子任務建議。
+ * @exports generateSubtasks - 觸發子任務建議生成過程的函數。
+ * @exports GenerateSubtasksInput - generateSubtasks 函數的輸入類型。
+ * @exports GenerateSubtasksOutput - generateSubtasks 函數的返回類型。
  */
 
 import { ai } from '@/ai/genkit';

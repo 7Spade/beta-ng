@@ -1,10 +1,11 @@
 'use server';
+
 /**
- * @fileOverview An AI agent for generating content for a knowledge base entry.
- *
- * - generateKnowledgeEntry - A function that generates content suggestions.
- * - GenerateKnowledgeEntryInput - The input type for the function.
- * - GenerateKnowledgeEntryOutput - The return type for the function.
+ * @fileOverview 工法庫內容生成流程
+ * @description 此 AI 流程根據使用者提供的標題，自動生成一篇結構完整的工法工序庫文章，包含分類、Markdown 內容和關鍵字標籤。
+ * @exports generateKnowledgeEntry - 觸發工法內容生成過程的函數。
+ * @exports GenerateKnowledgeEntryInput - generateKnowledgeEntry 函數的輸入類型。
+ * @exports GenerateKnowledgeEntryOutput - generateKnowledgeEntry 函數的返回類型。
  */
 
 import { ai } from '@/ai/genkit';

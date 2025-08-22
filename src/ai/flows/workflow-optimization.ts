@@ -1,11 +1,11 @@
 'use server';
 
 /**
- * @fileOverview An AI-powered tool to auto-suggest workflow optimizations based on historical transaction data.
- *
- * - suggestWorkflowOptimizations - A function that handles the workflow optimization process.
- * - SuggestWorkflowOptimizationsInput - The input type for the suggestWorkflowOptimizations function.
- * - SuggestWorkflowOptimizationsOutput - The return type for the suggestWorkflowOptimizations function.
+ * @fileOverview 工作流程優化建議流程
+ * @description 此 AI 流程分析歷史交易數據和目前的工作流程定義，以提供可行的優化建議、預測的效率提升百分比，以及詳細的理由說明。
+ * @exports suggestWorkflowOptimizations - 觸發流程優化建議過程的函數。
+ * @exports SuggestWorkflowOptimizationsInput - suggestWorkflowOptimizations 函數的輸入類型。
+ * @exports SuggestWorkflowOptimizationsOutput - suggestWorkflowOptimizations 函數的返回類型。
  */
 
 import {ai} from '@/ai/genkit';
