@@ -177,6 +177,7 @@ export const ReceivablePayableSystem: React.FC = () => {
         try {
             const docData = {
                 partnerId: newDocument.partnerId,
+                partnerName: partner.name,
                 contractId: newDocument.contractId,
                 contractName: contract.name,
                 type: newDocument.type,
@@ -296,7 +297,7 @@ export const ReceivablePayableSystem: React.FC = () => {
                                 <CardHeader>
                                     <div className="flex justify-between items-start">
                                         <div>
-                                            <CardTitle className="text-xl">{getPartnerName(doc.partnerId)}</CardTitle>
+                                            <CardTitle className="text-xl">{doc.partnerName}</CardTitle>
                                             <CardDescription>單據 #{doc.id.substring(0,5)}...</CardDescription>
                                         </div>
                                         <Badge variant={doc.type === 'receivable' ? 'default' : 'secondary'}>
