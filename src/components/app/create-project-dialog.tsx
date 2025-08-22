@@ -26,13 +26,13 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
 const projectSchema = z.object({
-  title: z.string().min(3, 'Title must be at least 3 characters long.'),
-  description: z.string().min(10, 'Description must be at least 10 characters long.'),
-  value: z.coerce.number().min(1, 'Value must be at least 1.'),
-  startDate: z.date({ required_error: 'A start date is required.' }),
-  endDate: z.date({ required_error: 'An end date is required.' }),
+  title: z.string().min(3, '標題至少需要 3 個字元。'),
+  description: z.string().min(10, '描述至少需要 10 個字元。'),
+  value: z.coerce.number().min(1, '總價值至少需要為 1。'),
+  startDate: z.date({ required_error: '起始日期為必填項。' }),
+  endDate: z.date({ required_error: '結束日期為必填項。' }),
 }).refine((data) => data.endDate > data.startDate, {
-  message: "End date cannot be earlier than start date.",
+  message: "結束日期不能早於起始日期。",
   path: ["endDate"],
 });
 
@@ -47,15 +47,15 @@ export function CreateProjectDialog() {
     defaultValues: {
       title: '',
       description: '',
-      value: 100,
+      value: 100000,
     },
   });
 
   function onSubmit(values: z.infer<typeof projectSchema>) {
     addProject(values);
     toast({
-      title: 'Project Created!',
-      description: `"${values.title}" has been successfully added.`,
+      title: '專案已建立！',
+      description: `專案 "${values.title}" 已成功新增。`,
     });
     setOpen(false);
     form.reset();
@@ -66,14 +66,14 @@ export function CreateProjectDialog() {
       <DialogTrigger asChild>
         <Button variant="default" className="bg-primary hover:bg-primary/90">
           <PlusCircle className="mr-2 h-4 w-4" />
-          New Project
+          新增專案
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Project</DialogTitle>
+          <DialogTitle>建立新專案</DialogTitle>
           <DialogDescription>
-            Fill in the details below to create a new construction project.
+            請填寫以下詳細資訊以建立新的營造專案。
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -83,9 +83,9 @@ export function CreateProjectDialog() {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Project Title</FormLabel>
+                  <FormLabel>專案標題</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Downtown Office Tower" {...field} />
+                    <Input placeholder="例如：市中心辦公大樓" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -96,10 +96,10 @@ export function CreateProjectDialog() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>專案描述</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="A brief description of the project scope and goals."
+                      placeholder="簡要描述專案範疇與目標。"
                       {...field}
                     />
                   </FormControl>
@@ -112,9 +112,9 @@ export function CreateProjectDialog() {
               name="value"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Project Value</FormLabel>
+                  <FormLabel>專案總價值</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="e.g., 100" {...field} />
+                    <Input type="number" placeholder="例如：100000" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -126,7 +126,7 @@ export function CreateProjectDialog() {
                 name="startDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Start Date</FormLabel>
+                    <FormLabel>起始日期</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -140,7 +140,7 @@ export function CreateProjectDialog() {
                             {field.value ? (
                               format(field.value, 'PPP')
                             ) : (
-                              <span>Pick a date</span>
+                              <span>選擇一個日期</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -164,7 +164,7 @@ export function CreateProjectDialog() {
                 name="endDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>End Date</FormLabel>
+                    <FormLabel>結束日期</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -178,7 +178,7 @@ export function CreateProjectDialog() {
                             {field.value ? (
                               format(field.value, 'PPP')
                             ) : (
-                              <span>Pick a date</span>
+                              <span>選擇一個日期</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -200,7 +200,7 @@ export function CreateProjectDialog() {
             </div>
             <DialogFooter>
               <Button type="submit" variant="default" className="bg-primary hover:bg-primary/90">
-                Create Project
+                建立專案
               </Button>
             </DialogFooter>
           </form>

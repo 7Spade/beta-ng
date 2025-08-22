@@ -22,44 +22,44 @@ import {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Contracts</CardTitle>
+            <CardTitle className="text-sm font-medium">總合約數</CardTitle>
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalContracts}</div>
-            <p className="text-xs text-muted-foreground">All registered contracts</p>
+            <p className="text-xs text-muted-foreground">所有已註冊的合約</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Contracts</CardTitle>
+            <CardTitle className="text-sm font-medium">啟用中合約</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{active}</div>
-            <p className="text-xs text-muted-foreground">Currently ongoing projects</p>
+            <p className="text-xs text-muted-foreground">目前進行中的專案</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed Contracts</CardTitle>
+            <CardTitle className="text-sm font-medium">已完成合約</CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{completed}</div>
-            <p className="text-xs text-muted-foreground">Successfully finished projects</p>
+            <p className="text-xs text-muted-foreground">已成功完成的專案</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Contract Value</CardTitle>
+            <CardTitle className="text-sm font-medium">總合約價值</CardTitle>
             <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               ${new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(totalValue)}
             </div>
-            <p className="text-xs text-muted-foreground">Combined value of all contracts</p>
+            <p className="text-xs text-muted-foreground">所有合約的總價值</p>
           </CardContent>
         </Card>
       </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import type { Contract } from '@/types';
+import type { Contract } from '@/lib/types';
 import {
   Table,
   TableBody,
@@ -26,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Download, MoreHorizontal, Eye } from 'lucide-react';
-import { ContractDetailsSheet } from './contract-details-sheet';
+import { ContractDetailsSheet } from './contracts-details-sheet';
 import { formatDate } from '@/lib/utils';
 
 interface ContractsTableProps {
@@ -51,7 +51,7 @@ export function ContractsTable({ contracts: initialContracts }: ContractsTablePr
   }
 
   const handleExport = () => {
-    const headers = ['ID', 'Name', 'Contractor', 'Client', 'Start Date', 'End Date', 'Total Value', 'Status'];
+    const headers = ['ID', '名稱', '承包商', '客戶', '開始日期', '結束日期', '總價值', '狀態'];
     const rows = contracts.map(c => [
       c.id,
       `"${c.name.replace(/"/g, '""')}"`,
@@ -77,13 +77,13 @@ export function ContractsTable({ contracts: initialContracts }: ContractsTablePr
 
   const getStatusVariant = (status: Contract['status']): 'default' | 'secondary' | 'outline' | 'destructive' => {
     switch (status) {
-      case 'Active':
+      case '啟用中':
         return 'default';
-      case 'Completed':
+      case '已完成':
         return 'secondary';
-      case 'On Hold':
+      case '暫停中':
         return 'outline';
-      case 'Terminated':
+      case '已終止':
         return 'destructive';
       default:
         return 'default';
@@ -95,24 +95,24 @@ export function ContractsTable({ contracts: initialContracts }: ContractsTablePr
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Contracts</CardTitle>
-            <CardDescription>An overview of all ongoing and completed construction contracts.</CardDescription>
+            <CardTitle>合約</CardTitle>
+            <CardDescription>所有進行中和已完成的營造合約總覽。</CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="mr-2 h-4 w-4" />
-            Export CSV
+            匯出 CSV
           </Button>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Contract Name</TableHead>
-                <TableHead className="hidden md:table-cell">Contractor</TableHead>
-                <TableHead className="hidden lg:table-cell">End Date</TableHead>
-                <TableHead>Value</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead><span className="sr-only">Actions</span></TableHead>
+                <TableHead>合約名稱</TableHead>
+                <TableHead className="hidden md:table-cell">承包商</TableHead>
+                <TableHead className="hidden lg:table-cell">結束日期</TableHead>
+                <TableHead>價值</TableHead>
+                <TableHead>狀態</TableHead>
+                <TableHead><span className="sr-only">操作</span></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -134,13 +134,13 @@ export function ContractsTable({ contracts: initialContracts }: ContractsTablePr
                       <DropdownMenuTrigger asChild>
                         <Button aria-haspopup="true" size="icon" variant="ghost">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
+                          <span className="sr-only">切換選單</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenuItem onSelect={() => handleViewDetails(contract)}>
                           <Eye className="mr-2 h-4 w-4" />
-                          View Details
+                          查看詳情
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

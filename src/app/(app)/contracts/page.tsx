@@ -1,17 +1,20 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
-import type { Contract, ContractStatus } from '@/types';
-import { DashboardStats } from '@/components/contract/dashboard-stats';
-import { ContractsTable } from '@/components/contract/contracts-table';
-import { AiSummarizerDialog } from '@/components/contract/ai-summarizer-dialog';
-import { Logo } from '@/components/layout/logo';
-import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { collection, onSnapshot, addDoc, Timestamp, query } from 'firebase/firestore';
+import type { Contract } from '@/lib/types';
+import { ContractsTable } from '@/components/contracts/contracts-table';
+import { AiSummarizerDialog } from '@/components/contracts/ai-summarizer-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ContractDashboard } from '@/components/contracts/dashboard/dashboard';
+import { CreateContractDialog } from '@/components/contracts/create-contract-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
+
 
 // Helper function to convert Firestore Timestamps to Dates
 const processFirestoreContract = (doc: any): Contract => {
@@ -38,48 +41,78 @@ const processFirestoreContract = (doc: any): Contract => {
 };
 
 
-export default function Home() {
+export default function ContractsPage() {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const [isCreateDialogOpen, setCreateDialogOpen] = useState(false);
 
   useEffect(() => {
-    const fetchContracts = async () => {
-      try {
-        const contractsCollection = collection(db, 'contracts');
-        const contractSnapshot = await getDocs(contractsCollection);
-        const contractList = contractSnapshot.docs.map(processFirestoreContract);
+    const contractsCollection = collection(db, 'contracts');
+    const q = query(contractsCollection);
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const contractList = querySnapshot.docs.map(processFirestoreContract);
         setContracts(contractList);
-      } catch (error) {
-        console.error("Error fetching contracts: ", error);
-      } finally {
         setLoading(false);
-      }
-    };
-
-    fetchContracts();
+    }, (error) => {
+        console.error("獲取合約時發生錯誤：", error);
+        setLoading(false);
+    });
+    
+    return () => unsubscribe();
   }, []);
 
-  const stats = {
-    totalContracts: contracts.length,
-    active: contracts.filter(c => c.status === 'Active').length,
-    completed: contracts.filter(c => c.status === 'Completed').length,
-    totalValue: contracts.reduce((acc, c) => acc + c.totalValue, 0),
+  const handleAddContract = async (data: Omit<Contract, 'id' | 'payments' | 'changeOrders' | 'versions'>) => {
+    try {
+        const newContractData = {
+            ...data,
+            startDate: Timestamp.fromDate(data.startDate),
+            endDate: Timestamp.fromDate(data.endDate),
+            payments: [],
+            changeOrders: [],
+            versions: [{
+                version: 1,
+                date: Timestamp.now(),
+                changeSummary: "初始版本"
+            }]
+        };
+
+        await addDoc(collection(db, 'contracts'), newContractData);
+        
+        toast({
+            title: "合約已建立",
+            description: `合約 "${data.name}" 已成功新增。`,
+        });
+        setCreateDialogOpen(false);
+        return true;
+
+    } catch (error) {
+        console.error("新增合約時發生錯誤：", error);
+        toast({
+            title: "錯誤",
+            description: "新增合約失敗，請再試一次。",
+            variant: "destructive",
+        });
+        return false;
+    }
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background">
-      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur sm:px-6">
-        <Logo className="h-6 w-6" />
-        <div className="ml-auto flex items-center gap-2">
+    <div className="space-y-6">
+       <div className="flex items-center justify-end gap-2">
           <AiSummarizerDialog />
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            New Contract
+          <Button onClick={() => setCreateDialogOpen(true)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              新增合約
           </Button>
+          <CreateContractDialog 
+            isOpen={isCreateDialogOpen} 
+            onOpenChange={setCreateDialogOpen} 
+            onSave={handleAddContract} 
+          />
         </div>
-      </header>
-      <main className="flex flex-1 flex-col gap-4 p-4 sm:px-6 sm:py-8 md:gap-8">
-        <DashboardStats stats={stats} />
+      
+        <ContractDashboard />
         {loading ? (
             <Card>
                 <CardHeader>
@@ -97,7 +130,6 @@ export default function Home() {
         ) : (
             <ContractsTable contracts={contracts} />
         )}
-      </main>
     </div>
   );
 }

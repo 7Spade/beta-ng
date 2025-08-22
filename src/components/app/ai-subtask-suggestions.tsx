@@ -33,7 +33,7 @@ export function AISubtaskSuggestions({
         const result = await generateSubtasks({ projectTitle, taskTitle });
         setSuggestions(result.suggestions);
       } catch (err) {
-        setError('Failed to generate AI suggestions. Please try again.');
+        setError('生成 AI 建議失敗，請再試一次。');
         console.error(err);
       } finally {
         setLoading(false);
@@ -46,8 +46,8 @@ export function AISubtaskSuggestions({
     onAddSubtask(suggestion);
     setSuggestions(suggestions.filter((s) => s !== suggestion));
     toast({
-        title: "Sub-task Added",
-        description: `"${suggestion}" was added to your task list.`
+        title: "子任務已新增",
+        description: `"${suggestion}" 已被加到您的任務清單中。`
     })
   };
 
@@ -58,13 +58,13 @@ export function AISubtaskSuggestions({
                 <X className="h-4 w-4" />
              </Button>
             <AlertTitle className="flex items-center gap-2">
-                AI Sub-task Suggestions
+                AI 子任務建議
             </AlertTitle>
             <AlertDescription>
             {loading && (
                 <div className="flex items-center gap-2 py-4">
                     <Loader className="h-4 w-4 animate-spin" />
-                    <span>Generating ideas...</span>
+                    <span>正在生成想法...</span>
                 </div>
             )}
             {error && <p className="text-destructive">{error}</p>}
@@ -75,11 +75,11 @@ export function AISubtaskSuggestions({
                     <span>{suggestion}</span>
                     <Button variant="outline" size="sm" onClick={() => handleAddSuggestion(suggestion)}>
                         <PlusCircle className="mr-2 h-4 w-4" />
-                        Add
+                        新增
                     </Button>
                     </li>
                 ))}
-                 {suggestions.length === 0 && <p className="text-sm text-muted-foreground">All suggestions have been added or none were generated.</p>}
+                 {suggestions.length === 0 && <p className="text-sm text-muted-foreground">所有建議都已被新增，或沒有生成任何建議。</p>}
                 </ul>
             )}
             </AlertDescription>

@@ -39,7 +39,7 @@ export default function ProjectDetailPage() {
     e.preventDefault();
     if(taskTitle.trim() && taskValue > 0) {
         if (taskValue > remainingValue) {
-            alert(`Task value (${taskValue}) cannot exceed remaining project value of ${remainingValue}`);
+            alert(`任務價值 (${taskValue.toLocaleString()}) 不可超過剩餘的專案價值 ${remainingValue.toLocaleString()}`);
             return;
         }
         addTask(project.id, null, taskTitle.trim(), taskQuantity, taskUnitPrice);
@@ -60,19 +60,19 @@ export default function ProjectDetailPage() {
               <CardDescription className="text-base mt-1">{project.description}</CardDescription>
             </div>
             <Badge variant="outline" className="text-lg">
-                Total Value: ${project.value.toLocaleString()}
+                總價值: ${project.value.toLocaleString()}
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
           <div className="flex space-x-8 text-sm">
             <div>
-              <span className="font-semibold">Start Date: </span>
-              <span className="text-muted-foreground">{project.startDate ? format(project.startDate, 'MMMM dd, yyyy') : 'N/A'}</span>
+              <span className="font-semibold">開始日期: </span>
+              <span className="text-muted-foreground">{project.startDate ? format(project.startDate, 'yyyy-MM-dd') : '無'}</span>
             </div>
             <div>
-              <span className="font-semibold">End Date: </span>
-              <span className="text-muted-foreground">{project.endDate ? format(project.endDate, 'MMMM dd, yyyy') : 'N/A'}</span>
+              <span className="font-semibold">結束日期: </span>
+              <span className="text-muted-foreground">{project.endDate ? format(project.endDate, 'yyyy-MM-dd') : '無'}</span>
             </div>
           </div>
         </CardContent>
@@ -81,15 +81,15 @@ export default function ProjectDetailPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Tasks</CardTitle>
+            <CardTitle>任務</CardTitle>
              <CardDescription>
-              Remaining value to assign: <span className="font-bold text-foreground">${remainingValue.toLocaleString()}</span>
+              可分配的剩餘價值：<span className="font-bold text-foreground">${remainingValue.toLocaleString()}</span>
             </CardDescription>
           </div>
           {!isAddingTask && (
             <Button variant="outline" onClick={() => setIsAddingTask(true)} disabled={remainingValue === 0}>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Add Task
+              新增任務
             </Button>
           )}
         </CardHeader>
@@ -97,7 +97,7 @@ export default function ProjectDetailPage() {
             {isAddingTask && (
                 <form onSubmit={handleAddTask} className="flex items-center gap-2 p-2 rounded-lg border bg-secondary">
                     <Input 
-                        placeholder="Enter new task title..." 
+                        placeholder="輸入新任務標題..." 
                         value={taskTitle}
                         onChange={(e) => setTaskTitle(e.target.value)}
                         className="flex-grow"
@@ -105,23 +105,23 @@ export default function ProjectDetailPage() {
                     />
                     <Input
                         type="number"
-                        placeholder="Qty"
+                        placeholder="數量"
                         value={taskQuantity || ''}
                         onChange={(e) => setTaskQuantity(parseInt(e.target.value, 10) || 1)}
                         className="w-20"
                     />
                     <Input
                         type="number"
-                        placeholder="Unit Price"
+                        placeholder="單價"
                         value={taskUnitPrice || ''}
                         onChange={(e) => setTaskUnitPrice(parseInt(e.target.value, 10) || 0)}
                         className="w-24"
                     />
                      <Badge variant="secondary" className="w-24 justify-center">
-                        Value: ${taskValue.toLocaleString()}
+                        價值: ${taskValue.toLocaleString()}
                     </Badge>
-                    <Button type="submit" className="bg-primary hover:bg-primary/90">Add Task</Button>
-                    <Button type="button" variant="ghost" onClick={() => setIsAddingTask(false)}>Cancel</Button>
+                    <Button type="submit" className="bg-primary hover:bg-primary/90">新增任務</Button>
+                    <Button type="button" variant="ghost" onClick={() => setIsAddingTask(false)}>取消</Button>
                 </form>
             )}
 
@@ -134,8 +134,8 @@ export default function ProjectDetailPage() {
             ) : (
                 !isAddingTask && (
                     <div className="text-center py-10 border-2 border-dashed rounded-lg">
-                        <h3 className="text-lg font-medium">No tasks yet</h3>
-                        <p className="text-sm text-muted-foreground">Click "Add Task" to start planning.</p>
+                        <h3 className="text-lg font-medium">尚無任務</h3>
+                        <p className="text-sm text-muted-foreground">點擊「新增任務」以開始規劃。</p>
                     </div>
                 )
             )}

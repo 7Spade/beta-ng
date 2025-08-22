@@ -13,19 +13,26 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import type { ExtractWorkItemsOutput } from '@/ai/flows/extract-work-items';
+import { Badge } from '../ui/badge';
 
-type WorkItem = ExtractWorkItemsOutput['workItems'][0];
+export type WorkItem = ExtractWorkItemsOutput['workItems'][0];
 
 interface WorkItemsTableProps {
   initialData: WorkItem[];
+  onDataChange: (data: WorkItem[]) => void;
 }
 
-export function WorkItemsTable({ initialData }: WorkItemsTableProps) {
+export function WorkItemsTable({ initialData, onDataChange }: WorkItemsTableProps) {
   const [data, setData] = useState<WorkItem[]>(initialData);
 
   useEffect(() => {
     setData(initialData);
   }, [initialData]);
+
+  const updateData = (newData: WorkItem[]) => {
+      setData(newData);
+      onDataChange(newData);
+  }
 
   const handleInputChange = (index: number, field: keyof WorkItem, value: string | number) => {
     const newData = [...data];
@@ -54,26 +61,26 @@ export function WorkItemsTable({ initialData }: WorkItemsTableProps) {
     }
 
     newData[index] = updatedItem;
-    setData(newData);
+    updateData(newData);
   };
   
   const handleRemoveRow = (index: number) => {
     const newData = data.filter((_, i) => i !== index);
-    setData(newData);
+    updateData(newData);
   };
 
   const handleAddRow = () => {
     const newRow: WorkItem = {
-      item: 'New Item',
+      item: '新項目',
       quantity: 1,
       price: 0,
       unitPrice: 0,
     };
-    setData([...data, newRow]);
+    updateData([...data, newRow]);
   };
   
   const exportToCSV = () => {
-    const headers = ['Item', 'Quantity', 'Unit Price', 'Price'];
+    const headers = ['項目', '數量', '單價', '總價'];
     const csvContent = [
       headers.join(','),
       ...data.map(row => `"${row.item.replace(/"/g, '""')}",${row.quantity},${row.unitPrice},${row.price}`)
@@ -98,15 +105,17 @@ export function WorkItemsTable({ initialData }: WorkItemsTableProps) {
     link.click();
     document.body.removeChild(link);
   };
+  
+  const totalAmount = data.reduce((sum, item) => sum + item.price, 0);
 
   if (data.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">No work items were extracted from the document.</p>
-        <p className="text-muted-foreground mt-2">You can add items manually below.</p>
+        <p className="text-muted-foreground">文件中未提取到任何工作項目。</p>
+        <p className="text-muted-foreground mt-2">您可以在下方手動新增項目。</p>
         <Button onClick={handleAddRow} className="mt-4" variant="secondary">
           <Plus className="mr-2 h-4 w-4" />
-          Add Item
+          新增項目
         </Button>
       </div>
     );
@@ -119,10 +128,11 @@ export function WorkItemsTable({ initialData }: WorkItemsTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-12 text-center">#</TableHead>
-              <TableHead className="w-[50%]">Item Description</TableHead>
-              <TableHead className="text-right w-[120px]">Quantity</TableHead>
-              <TableHead className="text-right w-[150px]">Unit Price</TableHead>
-              <TableHead className="text-right w-[150px]">Total Price</TableHead>
+              <TableHead className="w-[100px] text-center">佔比</TableHead>
+              <TableHead className="w-[45%]">項目描述</TableHead>
+              <TableHead className="text-right w-[120px]">數量</TableHead>
+              <TableHead className="text-right w-[150px]">單價</TableHead>
+              <TableHead className="text-right w-[150px]">總價</TableHead>
               <TableHead className="w-12 p-2"></TableHead>
             </TableRow>
           </TableHeader>
@@ -130,6 +140,11 @@ export function WorkItemsTable({ initialData }: WorkItemsTableProps) {
             {data.map((row, index) => (
               <TableRow key={index} className="hover:bg-muted/50">
                 <TableCell className="text-center text-muted-foreground">{index + 1}</TableCell>
+                <TableCell className="text-center">
+                    <Badge variant="outline">
+                        {totalAmount > 0 ? ((row.price / totalAmount) * 100).toFixed(1) : '0.0'}%
+                    </Badge>
+                </TableCell>
                 <TableCell className="p-1">
                   <Input
                     value={row.item}
@@ -166,7 +181,7 @@ export function WorkItemsTable({ initialData }: WorkItemsTableProps) {
                 <TableCell className="p-1 text-center">
                     <Button variant="ghost" size="icon" onClick={() => handleRemoveRow(index)}>
                         <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                        <span className="sr-only">Remove row</span>
+                        <span className="sr-only">移除此行</span>
                     </Button>
                 </TableCell>
               </TableRow>
@@ -174,20 +189,27 @@ export function WorkItemsTable({ initialData }: WorkItemsTableProps) {
           </TableBody>
         </Table>
       </div>
-
+      
       <div className="flex justify-between items-center mt-6">
         <Button onClick={handleAddRow} variant="outline">
           <Plus className="mr-2 h-4 w-4" />
-          Add Row
+          新增一列
         </Button>
+        <div className="text-right">
+            <p className="text-sm text-muted-foreground">總金額</p>
+            <p className="text-2xl font-bold">${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+        </div>
+      </div>
+
+      <div className="flex justify-start items-center mt-6">
         <div className="flex gap-2">
           <Button onClick={exportToCSV} variant="secondary">
             <FileText className="mr-2 h-4 w-4" />
-            Export CSV
+            匯出 CSV
           </Button>
           <Button onClick={exportToJSON} variant="secondary">
             <FileJson className="mr-2 h-4 w-4" />
-            Export JSON
+            匯出 JSON
           </Button>
         </div>
       </div>

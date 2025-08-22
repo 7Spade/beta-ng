@@ -6,32 +6,29 @@ import type { NavigationItem } from '@/config/navigation.config'
 
 interface NavigationMenuProps {
   items: NavigationItem[]
-  activeRoute: string
-  expandedSections: string[]
-  onNavigate?: (route: string) => void
   onToggleSection?: (sectionId: string) => void
   isRouteActive: (route: string) => boolean
   isSectionExpanded: (sectionId: string) => boolean
+  onNavigate?: (route: string) => void
 }
 
 export function NavigationMenu({
   items,
-  activeRoute,
-  expandedSections,
   onNavigate,
   onToggleSection,
   isRouteActive,
-  isSectionExpanded
+  isSectionExpanded,
 }: NavigationMenuProps) {
   return (
     <SidebarMenu>
-      {items.map((item) => {
-        // 檢查項目或其子項目是否為活躍狀態
-        const isActive = isRouteActive(item.href) || 
+      {items.map(item => {
+        // Check if the item or any of its children are active
+        const isActive =
+          isRouteActive(item.href) ||
           (item.children?.some(child => isRouteActive(child.href)) ?? false)
-        
+
         const isExpanded = isSectionExpanded(item.id)
-        
+
         return (
           <NavigationMenuItem
             key={item.id}

@@ -19,7 +19,7 @@ function calculateProgress(tasks: Task[]): { completedValue: number } {
       if (task.subTasks && task.subTasks.length > 0) {
         recurse(task.subTasks);
       } else {
-        if (task.status === 'Completed') {
+        if (task.status === '已完成') {
           completedValue += task.value;
         }
       }
@@ -35,16 +35,10 @@ export default function ProjectsPage() {
   const { projects, loading } = useProjects();
 
   return (
-    <div className="space-y-8">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
-          <p className="text-muted-foreground">
-            Manage all your construction projects from one place.
-          </p>
-        </div>
+    <>
+      <div className="flex items-center justify-end">
         <CreateProjectDialog />
-      </header>
+      </div>
       
       {loading ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -70,8 +64,8 @@ export default function ProjectsPage() {
         </div>
       ) : projects.length === 0 ? (
         <div className="text-center py-16 border-2 border-dashed rounded-lg">
-            <h2 className="text-xl font-semibold">No Projects Yet</h2>
-            <p className="text-muted-foreground mt-2">Click "New Project" to get started.</p>
+            <h2 className="text-xl font-semibold">尚無專案</h2>
+            <p className="text-muted-foreground mt-2">點擊「新增專案」以開始。</p>
         </div>
       ) : (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -88,20 +82,20 @@ export default function ProjectsPage() {
               <CardContent className="flex-grow space-y-4">
                 <div className="space-y-1">
                     <div className="flex justify-between items-baseline">
-                         <span className="text-sm font-medium text-muted-foreground">Progress</span>
+                         <span className="text-sm font-medium text-muted-foreground">進度</span>
                          <span className="text-sm font-semibold">{Math.round(progressPercentage)}%</span>
                     </div>
                     <Progress value={progressPercentage} className="h-2" />
-                    <p className="text-xs text-muted-foreground text-right">${completedValue.toLocaleString()} of ${project.value.toLocaleString()} value complete</p>
+                    <p className="text-xs text-muted-foreground text-right">價值 ${completedValue.toLocaleString()} / ${project.value.toLocaleString()} 已完成</p>
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  <p><span className="font-medium text-foreground">Start:</span> {project.startDate ? format(project.startDate, 'MMM dd, yyyy') : 'N/A'}</p>
-                  <p><span className="font-medium text-foreground">End:</span> {project.endDate ? format(project.endDate, 'MMM dd, yyyy') : 'N/A'}</p>
+                  <p><span className="font-medium text-foreground">開始日期：</span> {project.startDate ? format(project.startDate, 'yyyy-MM-dd') : '無'}</p>
+                  <p><span className="font-medium text-foreground">結束日期：</span> {project.endDate ? format(project.endDate, 'yyyy-MM-dd') : '無'}</p>
                 </div>
               </CardContent>
               <CardFooter>
                 <Button asChild className="w-full bg-primary hover:bg-primary/90">
-                  <Link href={`/projects/${project.id}`}>View Details</Link>
+                  <Link href={`/projects/${project.id}`}>查看詳情</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -109,6 +103,6 @@ export default function ProjectsPage() {
         })}
       </div>
       )}
-    </div>
+    </>
   );
 }

@@ -19,7 +19,7 @@ export default function WorkflowsPage() {
                 const partnerList = partnerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Partner[];
                 setPartners(partnerList);
             } catch (error) {
-                console.error("Error fetching partners for workflow: ", error);
+                console.error("為工作流程獲取合作夥伴時發生錯誤：", error);
             } finally {
                 setIsLoading(false);
             }
@@ -29,7 +29,7 @@ export default function WorkflowsPage() {
     }, []);
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return <div>正在載入...</div>
     }
 
   return <WorkflowBuilder partners={partners} />;

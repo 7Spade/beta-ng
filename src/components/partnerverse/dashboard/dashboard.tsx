@@ -1,3 +1,15 @@
+/**
+ * @project Beta-NG Integrated Platform - 統一整合平台 PartnerVerse 儀表板
+ * @framework Next.js 15+ (App Router)
+ * @typescript 5.0+
+ * @author Beta-NG Development Team
+ * @created 2025-01-22
+ * @updated 2025-01-22
+ * @version 1.0.0
+ * 
+ * @fileoverview PartnerVerse 儀表板元件
+ * @description 顯示合作夥伴相關統計數據，包括總數、各類別分佈及近期活動。
+ */
 'use client';
 
 import type { FC } from 'react';
@@ -15,9 +27,9 @@ interface DashboardProps {
 
 export const Dashboard: FC<DashboardProps> = ({ partners, onViewPartners }) => {
     const totalPartners = partners.length;
-    const activePartners = partners.filter(p => p.status === 'Active').length;
-    const inactivePartners = partners.filter(p => p.status === 'Inactive').length;
-    const pendingPartners = partners.filter(p => p.status === 'Pending').length;
+    const activePartners = partners.filter(p => p.status === '啟用中').length;
+    const inactivePartners = partners.filter(p => p.status === '停用中').length;
+    const pendingPartners = partners.filter(p => p.status === '待審核').length;
 
     const categoryData = partners.reduce((acc, partner) => {
         const category = partner.category;
@@ -36,48 +48,48 @@ export const Dashboard: FC<DashboardProps> = ({ partners, onViewPartners }) => {
     <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Partners</CardTitle>
+                <CardTitle className="text-sm font-medium">總合作夥伴數</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{totalPartners}</div>
-                <p className="text-xs text-muted-foreground">All partners in the system</p>
+                <p className="text-xs text-muted-foreground">系統中所有合作夥伴</p>
             </CardContent>
         </Card>
         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Partners</CardTitle>
+                <CardTitle className="text-sm font-medium">活躍合作夥伴</CardTitle>
                 <CheckCircle className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{activePartners}</div>
-                <p className="text-xs text-muted-foreground">{((activePartners/totalPartners) * 100).toFixed(0)}% of total</p>
+                <p className="text-xs text-muted-foreground">{totalPartners > 0 ? ((activePartners/totalPartners) * 100).toFixed(0) : 0}% 的佔比</p>
             </CardContent>
         </Card>
         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending Partners</CardTitle>
+                <CardTitle className="text-sm font-medium">待審批合作夥伴</CardTitle>
                 <Clock className="h-4 w-4 text-yellow-500" />
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{pendingPartners}</div>
-                 <p className="text-xs text-muted-foreground">Awaiting approval</p>
+                 <p className="text-xs text-muted-foreground">等待批准</p>
             </CardContent>
         </Card>
          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
+                <CardTitle className="text-sm font-medium">總交易量</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{totalTransactions}</div>
-                <p className="text-xs text-muted-foreground">Across all partners</p>
+                <p className="text-xs text-muted-foreground">所有合作夥伴的總和</p>
             </CardContent>
         </Card>
         <Card className="lg:col-span-2">
             <CardHeader>
-                <CardTitle>Partners by Category</CardTitle>
-                <CardDescription>Distribution of partners across different categories.</CardDescription>
+                <CardTitle>各類別合作夥伴</CardTitle>
+                <CardDescription>不同類別的合作夥伴分佈情況。</CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
                 <ResponsiveContainer width="100%" height={300}>
@@ -98,8 +110,8 @@ export const Dashboard: FC<DashboardProps> = ({ partners, onViewPartners }) => {
         </Card>
         <Card className="lg:col-span-2">
             <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                 <CardDescription>A quick look at the latest partner updates.</CardDescription>
+                <CardTitle>近期活動</CardTitle>
+                 <CardDescription>快速查看最新的合作夥伴更新。</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
@@ -116,7 +128,7 @@ export const Dashboard: FC<DashboardProps> = ({ partners, onViewPartners }) => {
             </CardContent>
              <CardFooter>
                 <Button className="w-full" onClick={onViewPartners}>
-                    View All Partners
+                    查看所有合作夥伴
                     <ArrowUpRight className="h-4 w-4 ml-2" />
                 </Button>
             </CardFooter>

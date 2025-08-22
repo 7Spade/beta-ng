@@ -28,7 +28,7 @@ export const OptimizationAssistant: FC = () => {
       const optimizationResult = await suggestWorkflowOptimizations(formData);
       setResult(optimizationResult);
     } catch (err) {
-      setError('Failed to get suggestions. Please try again.');
+      setError('取得建議失敗，請再試一次。');
       console.error(err);
     } finally {
       setLoading(false);
@@ -63,16 +63,16 @@ export const OptimizationAssistant: FC = () => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <Card className="lg:col-span-1">
         <CardHeader>
-          <CardTitle>AI Optimization Assistant</CardTitle>
-          <CardDescription>Provide data to get AI-powered workflow optimization suggestions.</CardDescription>
+          <CardTitle>AI 優化助理</CardTitle>
+          <CardDescription>提供資料以取得 AI 驅動的工作流程優化建議。</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="historicalData">Historical Transaction Data</Label>
+              <Label htmlFor="historicalData">歷史交易資料</Label>
               <Textarea
                 id="historicalData"
-                placeholder="Paste or describe historical transaction data, including times, partner performance, etc."
+                placeholder="貼上或描述歷史交易資料，包括時間、合作夥伴績效等。"
                 className="min-h-[150px]"
                 value={formData.historicalTransactionData}
                 onChange={(e) => setFormData({ ...formData, historicalTransactionData: e.target.value })}
@@ -81,10 +81,10 @@ export const OptimizationAssistant: FC = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="currentWorkflow">Current Workflow Definition</Label>
+              <Label htmlFor="currentWorkflow">目前工作流程定義</Label>
               <Textarea
                 id="currentWorkflow"
-                placeholder="Describe your current workflow from start to finish."
+                placeholder="從頭到尾描述您目前的工作流程。"
                 className="min-h-[150px]"
                 value={formData.currentWorkflowDefinition}
                 onChange={(e) => setFormData({ ...formData, currentWorkflowDefinition: e.target.value })}
@@ -94,7 +94,7 @@ export const OptimizationAssistant: FC = () => {
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               <Wand2 className="mr-2 h-4 w-4" />
-              {loading ? 'Analyzing...' : 'Suggest Optimizations'}
+              {loading ? '分析中...' : '建議優化'}
             </Button>
           </form>
         </CardContent>
@@ -106,7 +106,7 @@ export const OptimizationAssistant: FC = () => {
             <Card className="border-destructive">
                 <CardHeader className="flex-row items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-destructive" />
-                    <CardTitle className="text-destructive">Error</CardTitle>
+                    <CardTitle className="text-destructive">錯誤</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <p>{error}</p>
@@ -118,7 +118,7 @@ export const OptimizationAssistant: FC = () => {
                 <Card className="bg-primary/5 border-primary/20">
                     <CardHeader className="flex-row items-center gap-3 space-y-0">
                          <Lightbulb className="h-6 w-6 text-primary" />
-                         <CardTitle>Suggested Optimizations</CardTitle>
+                         <CardTitle>建議的優化</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="whitespace-pre-wrap">{result.suggestedOptimizations}</p>
@@ -127,7 +127,7 @@ export const OptimizationAssistant: FC = () => {
                  <Card>
                     <CardHeader className="flex-row items-center gap-3 space-y-0">
                          <TrendingUp className="h-6 w-6 text-green-600" />
-                         <CardTitle>Predicted Efficiency Increase</CardTitle>
+                         <CardTitle>預測效率提升</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="text-2xl font-bold text-green-600">{result.predictedEfficiencyIncrease}</p>
@@ -136,7 +136,7 @@ export const OptimizationAssistant: FC = () => {
                  <Card>
                     <CardHeader className="flex-row items-center gap-3 space-y-0">
                          <CheckCircle className="h-6 w-6 text-muted-foreground" />
-                         <CardTitle>Rationale</CardTitle>
+                         <CardTitle>理由</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="whitespace-pre-wrap text-muted-foreground">{result.rationale}</p>
@@ -148,8 +148,8 @@ export const OptimizationAssistant: FC = () => {
             <div className="flex items-center justify-center h-full rounded-lg border-2 border-dashed p-8">
                 <div className="text-center">
                     <Wand2 className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-semibold">Ready for suggestions?</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">Fill out the form to get started.</p>
+                    <h3 className="mt-4 text-lg font-semibold">準備好接收建議了嗎？</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">填寫表單以開始。</p>
                 </div>
             </div>
         )}

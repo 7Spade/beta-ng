@@ -20,7 +20,7 @@ const PartnerVerseDashboardPage: FC = () => {
         const partnerList = partnerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Partner[];
         setPartners(partnerList);
       } catch (error) {
-        console.error("Error fetching partners:", error);
+        console.error("獲取合作夥伴時發生錯誤:", error);
       } finally {
         setIsLoading(false);
       }

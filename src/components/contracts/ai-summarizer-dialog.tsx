@@ -39,7 +39,7 @@ export function AiSummarizerDialog() {
 
   const handleSummarize = async () => {
     if (!file) {
-      setError('Please select a file first.');
+      setError('請先選擇一個檔案。');
       return;
     }
     setIsLoading(true);
@@ -55,20 +55,20 @@ export function AiSummarizerDialog() {
         const result = await summarizeContract(input);
         setSummary(result.summary);
         toast({
-          title: "Summary Complete",
-          description: "The contract has been successfully summarized.",
+          title: "摘要完成",
+          description: "合約已成功生成摘要。",
           action: <CheckCircle2 className="text-green-500" />,
         });
       };
       reader.onerror = () => {
-        throw new Error('Failed to read file.');
+        throw new Error('讀取檔案失敗。');
       };
     } catch (e: any) {
-      const errorMessage = e.message || 'An unknown error occurred.';
+      const errorMessage = e.message || '發生未知錯誤。';
       setError(errorMessage);
        toast({
         variant: "destructive",
-        title: "Summarization Failed",
+        title: "摘要生成失敗",
         description: errorMessage,
         action: <XCircle className="text-white" />,
       });
@@ -98,18 +98,18 @@ export function AiSummarizerDialog() {
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <Button variant="outline" onClick={() => setIsOpen(true)}>
         <Wand2 className="mr-2 h-4 w-4" />
-        AI Summary
+        AI 摘要
       </Button>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>AI-Powered Contract Summary</DialogTitle>
+          <DialogTitle>AI 驅動的合約摘要</DialogTitle>
           <DialogDescription>
-            Upload a contract document to get a concise summary of its key terms, obligations, and deadlines.
+            上傳一份合約文件，即可獲得其關鍵條款、義務和截止日期的簡潔摘要。
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid w-full max-w-sm items-center gap-1.5">
-            <Label htmlFor="contract-file">Contract Document</Label>
+            <Label htmlFor="contract-file">合約文件</Label>
             <div className="flex items-center gap-2">
                 <Input id="contract-file" type="file" ref={fileInputRef} onChange={handleFileChange} accept=".pdf,.doc,.docx" />
                 {file && <span className="text-sm text-muted-foreground truncate">{file.name}</span>}
@@ -125,7 +125,7 @@ export function AiSummarizerDialog() {
           )}
           {summary && (
             <div>
-              <Label htmlFor="summary">Generated Summary</Label>
+              <Label htmlFor="summary">生成的摘要</Label>
               <Textarea id="summary" value={summary} readOnly rows={10} className="mt-1 bg-secondary" />
             </div>
           )}
@@ -134,7 +134,7 @@ export function AiSummarizerDialog() {
         <DialogFooter>
           <DialogClose asChild>
             <Button type="button" variant="secondary">
-              Close
+              關閉
             </Button>
           </DialogClose>
           <Button onClick={handleSummarize} disabled={!file || isLoading}>
@@ -143,7 +143,7 @@ export function AiSummarizerDialog() {
             ) : (
               <Wand2 className="mr-2 h-4 w-4" />
             )}
-            {isLoading ? 'Summarizing...' : 'Summarize'}
+            {isLoading ? '摘要中...' : '生成摘要'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -42,21 +42,6 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
       }));
   }
 
-  const fetchProjects = useCallback(async () => {
-    setLoading(true);
-    try {
-        const querySnapshot = await getDocs(collection(db, "projects"));
-        const projectsData = processFirestoreProjects(querySnapshot.docs);
-        setProjects(projectsData);
-    } catch (error) {
-        console.error("Error fetching projects: ", error);
-        // It's a good practice to handle the error, e.g., show a toast notification
-    } finally {
-        setLoading(false);
-    }
-  }, []);
-
-
   useEffect(() => {
     const projectsCollection = collection(db, 'projects');
     const unsubscribe = onSnapshot(projectsCollection, (querySnapshot) => {
@@ -64,7 +49,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
         setProjects(projectsData);
         setLoading(false);
     }, (error) => {
-        console.error("Error fetching projects with snapshot: ", error);
+        console.error("用快照獲取專案時發生錯誤：", error);
         setLoading(false);
     });
 
@@ -92,7 +77,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
 
         await batch.commit();
     } catch (error) {
-        console.error("Error adding project: ", error);
+        console.error("新增專案時發生錯誤：", error);
     }
   };
 
@@ -127,7 +112,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     const newTask: Task = {
         id: `task-${Date.now()}`,
         title: taskTitle,
-        status: 'Pending',
+        status: '待處理',
         lastUpdated: new Date().toISOString(),
         subTasks: [],
         quantity: quantity,
@@ -166,7 +151,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
 export const useProjects = () => {
   const context = useContext(ProjectContext);
   if (context === undefined) {
-    throw new Error('useProjects must be used within a ProjectProvider');
+    throw new Error('useProjects 必須在 ProjectProvider 中使用');
   }
   return context;
 };

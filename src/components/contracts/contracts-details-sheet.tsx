@@ -1,6 +1,6 @@
 'use client';
 
-import type { Contract, Payment, ChangeOrder, ContractVersion } from '@/types';
+import type { Contract, Payment, ChangeOrder, ContractVersion } from '@/lib/types';
 import {
   Sheet,
   SheetContent,
@@ -43,19 +43,19 @@ interface ContractDetailsSheetProps {
 
 export function ContractDetailsSheet({ contract, isOpen, onOpenChange }: ContractDetailsSheetProps) {
   const totalPaid = contract.payments
-    .filter((p) => p.status === 'Paid')
+    .filter((p) => p.status === '已付款')
     .reduce((acc, p) => acc + p.amount, 0);
   const paymentProgress = (totalPaid / contract.totalValue) * 100;
 
   const getStatusVariant = (status: Payment['status'] | ChangeOrder['status']): 'default' | 'secondary' | 'outline' | 'destructive' => {
      switch (status) {
-      case 'Paid':
-      case 'Approved':
+      case '已付款':
+      case '已核准':
         return 'default';
-      case 'Pending':
+      case '待處理':
         return 'outline';
-      case 'Overdue':
-      case 'Rejected':
+      case '已逾期':
+      case '已拒絕':
         return 'destructive';
       default:
         return 'secondary';
@@ -74,43 +74,43 @@ export function ContractDetailsSheet({ contract, isOpen, onOpenChange }: Contrac
           </SheetHeader>
           <Tabs defaultValue="details">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="details">Details</TabsTrigger>
-              <TabsTrigger value="payments">Payments</TabsTrigger>
-              <TabsTrigger value="changes">Changes</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="details">詳細資料</TabsTrigger>
+              <TabsTrigger value="payments">付款</TabsTrigger>
+              <TabsTrigger value="changes">變更單</TabsTrigger>
+              <TabsTrigger value="history">歷史紀錄</TabsTrigger>
             </TabsList>
             <TabsContent value="details" className="mt-4">
               <Card>
                 <CardContent className="pt-6 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Contractor</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground">承包商</h3>
                       <p className="font-semibold">{contract.contractor}</p>
                     </div>
                      <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Client</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground">客戶</h3>
                       <p className="font-semibold">{contract.client}</p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Start Date</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground">開始日期</h3>
                       <p className="font-semibold">{formatDate(contract.startDate)}</p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">End Date</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground">結束日期</h3>
                       <p className="font-semibold">{formatDate(contract.endDate)}</p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Total Value</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground">總價值</h3>
                       <p className="font-semibold">${contract.totalValue.toLocaleString()}</p>
                     </div>
                      <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground">狀態</h3>
                       <Badge>{contract.status}</Badge>
                     </div>
                   </div>
                   <Separator />
                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Scope of Work</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground">工作範疇</h3>
                       <p className="text-sm mt-1">{contract.scope}</p>
                     </div>
                 </CardContent>
@@ -119,24 +119,24 @@ export function ContractDetailsSheet({ contract, isOpen, onOpenChange }: Contrac
             <TabsContent value="payments" className="mt-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Payment Tracking</CardTitle>
-                  <CardDescription>Log of all payment requests and their status.</CardDescription>
+                  <CardTitle>付款追蹤</CardTitle>
+                  <CardDescription>所有付款請求及其狀態的紀錄。</CardDescription>
                   <div className="pt-2">
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium">Total Paid: ${totalPaid.toLocaleString()}</span>
+                      <span className="text-sm font-medium">總付款金額: ${totalPaid.toLocaleString()}</span>
                        <span className="text-sm font-medium">${contract.totalValue.toLocaleString()}</span>
                     </div>
-                    <Progress value={paymentProgress} aria-label={`${paymentProgress.toFixed(0)}% paid`} />
+                    <Progress value={paymentProgress} aria-label={`${paymentProgress.toFixed(0)}% 已付款`} />
                   </div>
                 </CardHeader>
                 <CardContent>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Request Date</TableHead>
-                         <TableHead>Status</TableHead>
-                        <TableHead>Paid Date</TableHead>
+                        <TableHead>金額</TableHead>
+                        <TableHead>請求日期</TableHead>
+                         <TableHead>狀態</TableHead>
+                        <TableHead>付款日期</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -145,7 +145,7 @@ export function ContractDetailsSheet({ contract, isOpen, onOpenChange }: Contrac
                           <TableCell>${payment.amount.toLocaleString()}</TableCell>
                           <TableCell>{formatDate(payment.requestDate)}</TableCell>
                           <TableCell><Badge variant={getStatusVariant(payment.status)}>{payment.status}</Badge></TableCell>
-                          <TableCell>{payment.paidDate ? formatDate(payment.paidDate) : 'N/A'}</TableCell>
+                          <TableCell>{payment.paidDate ? formatDate(payment.paidDate) : '未付款'}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -156,17 +156,17 @@ export function ContractDetailsSheet({ contract, isOpen, onOpenChange }: Contrac
             <TabsContent value="changes" className="mt-4">
                <Card>
                 <CardHeader>
-                  <CardTitle>Change Orders</CardTitle>
-                  <CardDescription>Management of contract modifications and revisions.</CardDescription>
+                  <CardTitle>變更單</CardTitle>
+                  <CardDescription>合約修改與修訂的管理。</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Status</TableHead>
-                         <TableHead>Cost Impact</TableHead>
+                        <TableHead>標題</TableHead>
+                        <TableHead>日期</TableHead>
+                        <TableHead>狀態</TableHead>
+                         <TableHead>成本影響</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -186,8 +186,8 @@ export function ContractDetailsSheet({ contract, isOpen, onOpenChange }: Contrac
             <TabsContent value="history" className="mt-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Version History</CardTitle>
-                  <CardDescription>Chronological record of contract versions.</CardDescription>
+                  <CardTitle>版本歷史</CardTitle>
+                  <CardDescription>合約版本的時間順序記錄。</CardDescription>
                 </CardHeader>
                 <CardContent>
                    <div className="space-y-4">

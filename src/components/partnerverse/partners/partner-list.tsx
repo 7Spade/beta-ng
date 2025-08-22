@@ -36,9 +36,9 @@ export const PartnerList: FC<PartnerListProps> = ({ partners, onSelectPartner, u
   
   const statusBadgeVariant = (status: Partner['status']) => {
     switch (status) {
-      case 'Active': return 'default';
-      case 'Inactive': return 'secondary';
-      case 'Pending': return 'outline';
+      case '啟用中': return 'default';
+      case '停用中': return 'secondary';
+      case '待審核': return 'outline';
       default: return 'default';
     }
   };
@@ -48,8 +48,8 @@ export const PartnerList: FC<PartnerListProps> = ({ partners, onSelectPartner, u
     <div className="space-y-6">
        <div className="flex items-center">
             <div className="flex-1">
-                <h2 className="text-3xl font-bold tracking-tight">Partners</h2>
-                <p className="text-muted-foreground">View and manage your business relationships.</p>
+                <h2 className="text-3xl font-bold tracking-tight">合作夥伴</h2>
+                <p className="text-muted-foreground">檢視和管理您的業務關係。</p>
             </div>
             <div className="ml-auto flex items-center gap-2">
               <DropdownMenu>
@@ -57,24 +57,24 @@ export const PartnerList: FC<PartnerListProps> = ({ partners, onSelectPartner, u
                   <Button variant="outline" size="sm" className="h-8 gap-1">
                     <ListFilter className="h-3.5 w-3.5" />
                     <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                      Filter
+                      篩選
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+                  <DropdownMenuLabel>篩選條件</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                    <DropdownMenuCheckboxItem checked>
-                    Status
+                    狀態
                   </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem>Category</DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem>類別</DropdownMenuCheckboxItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               {userRole === 'Admin' && (
                 <Button size="sm" className="h-8 gap-1" onClick={onAddPartner}>
                   <Plus className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Add Partner
+                    新增夥伴
                   </span>
                 </Button>
               )}
@@ -109,7 +109,7 @@ export const PartnerList: FC<PartnerListProps> = ({ partners, onSelectPartner, u
       </div>
        {filteredPartners.length === 0 && (
           <div className="text-center col-span-full py-16">
-            <p className="text-muted-foreground">No partners found. Try adjusting your filters.</p>
+            <p className="text-muted-foreground">找不到符合條件的合作夥伴。請嘗試調整您的篩選條件。</p>
           </div>
         )}
     </div>

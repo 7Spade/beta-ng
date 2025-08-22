@@ -20,7 +20,7 @@ export async function extractDataFromDocument(
   const file = formData.get('file') as File | null;
   
   if (!file || file.size === 0) {
-    return { error: 'Please select a file to upload.' };
+    return { error: '請選擇要上傳的檔案。' };
   }
 
   try {
@@ -30,19 +30,19 @@ export async function extractDataFromDocument(
     
     const validatedInput = actionInputSchema.safeParse({ documentDataUri });
     if (!validatedInput.success) {
-      return { error: 'Invalid file data URI.' };
+      return { error: '無效的檔案資料 URI。' };
     }
 
     const result = await extractWorkItems(validatedInput.data);
     
     if (!result || !result.workItems) {
-        return { error: 'Failed to extract data. The AI model returned an unexpected result.' };
+        return { error: '提取資料失敗。AI 模型回傳了非預期的結果。' };
     }
 
     return { data: result, fileName: file.name };
   } catch (e) {
     console.error(e);
-    const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred.';
-    return { error: `Failed to process document. Please ensure the file is not corrupted and try again.` };
+    const errorMessage = e instanceof Error ? e.message : '發生未知錯誤。';
+    return { error: `處理文件失敗。請確認檔案未損壞並再試一次。` };
   }
 }

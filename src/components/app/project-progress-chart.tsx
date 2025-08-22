@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -5,14 +6,10 @@ import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { Project, Task } from '@/lib/types';
 
-interface ProjectProgressChartProps {
-  project: Project;
-}
-
 const COLORS = {
-  Completed: 'hsl(var(--chart-1))',
-  'In Progress': 'hsl(var(--chart-2))',
-  Pending: 'hsl(var(--secondary))',
+  '已完成': 'hsl(var(--chart-1))',
+  '進行中': 'hsl(var(--chart-2))',
+  '待處理': 'hsl(var(--secondary))',
 };
 
 type ProgressData = {
@@ -20,6 +17,10 @@ type ProgressData = {
     inProgress: number;
     pending: number;
     totalValue: number;
+}
+
+interface ProjectProgressChartProps {
+  project: Project;
 }
 
 const calculateValueProgress = (project: Project): ProgressData => {
@@ -41,8 +42,8 @@ const calculateValueProgress = (project: Project): ProgressData => {
   allTasks.forEach(task => {
       // We only count leaf nodes for progress calculation to avoid double counting value.
       if (!task.subTasks || task.subTasks.length === 0) {
-          if (task.status === 'Completed') progress.completed += task.value;
-          else if (task.status === 'In Progress') progress.inProgress += task.value;
+          if (task.status === '已完成') progress.completed += task.value;
+          else if (task.status === '進行中') progress.inProgress += task.value;
           else progress.pending += task.value;
       }
   });
@@ -66,9 +67,9 @@ export function ProjectProgressChart({ project }: ProjectProgressChartProps) {
   const completionPercentage = totalValue > 0 ? Math.round((completed / totalValue) * 100) : 0;
 
   const data = [
-    { name: 'Completed', value: completed },
-    { name: 'In Progress', value: inProgress },
-    { name: 'Pending', value: pending },
+    { name: '已完成', value: completed },
+    { name: '進行中', value: inProgress },
+    { name: '待處理', value: pending },
   ].filter(item => item.value > 0);
   
   const totalTasks = project.tasks.reduce((acc, task) => acc + 1 + task.subTasks.length, 0);
@@ -78,7 +79,7 @@ export function ProjectProgressChart({ project }: ProjectProgressChartProps) {
     <Card>
       <CardHeader>
         <CardTitle>{project.title}</CardTitle>
-        <CardDescription>{totalTasks} tasks, Total Value: ${project.value.toLocaleString()}</CardDescription>
+        <CardDescription>{totalTasks} 個任務，總價值：${project.value.toLocaleString()}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center">
         <div className="relative h-48 w-48">
@@ -110,7 +111,7 @@ export function ProjectProgressChart({ project }: ProjectProgressChartProps) {
           )}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
              <span className="text-3xl font-bold text-foreground">{completionPercentage}%</span>
-             <span className="text-sm text-muted-foreground">Complete</span>
+             <span className="text-sm text-muted-foreground">已完成</span>
           </div>
         </div>
         <div className="mt-4 flex justify-center space-x-4">

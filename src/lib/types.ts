@@ -1,4 +1,5 @@
-export type TaskStatus = 'Pending' | 'In Progress' | 'Completed';
+
+export type TaskStatus = '待處理' | '進行中' | '已完成';
 
 export interface Task {
   id: string;
@@ -13,8 +14,11 @@ export interface Task {
 
 export interface Project {
   id: string;
+  customId?: string;
   title: string;
   description: string;
+  client?: string;
+  clientRepresentative?: string;
   startDate: Date;
   endDate: Date;
   tasks: Task[];
@@ -33,14 +37,14 @@ export interface Transaction {
   id: string;
   date: string;
   amount: number;
-  status: 'Completed' | 'Pending' | 'Failed';
+  status: '已完成' | '待處理' | '失敗';
   description: string;
 }
 
 export interface ComplianceDocument {
   id: string;
   name: string;
-  status: 'Valid' | 'Expiring Soon' | 'Expired';
+  status: '有效' | '即將到期' | '已過期';
   expiryDate: string;
   fileUrl: string;
 }
@@ -58,16 +62,18 @@ export interface ContractDocument {
     title: string;
     startDate: string;
     endDate: string;
-    status: 'Active' | 'Expired' | 'Terminated';
+    status: '啟用中' | '已過期' | '已終止';
     fileUrl: string;
 }
+
+export type PartnerFlowType = '未配置' | '純收款' | '純付款' | '收付款';
 
 export interface Partner {
   id?: string;
   name: string;
   logoUrl: string;
-  category: 'Technology' | 'Reseller' | 'Service' | 'Consulting' | 'Subcontractor' | 'Supplier' | 'Equipment';
-  status: 'Active' | 'Inactive' | 'Pending';
+  category: '技術' | '經銷商' | '服務' | '顧問' | '下游承包商' | '供應商' | '設備';
+  status: '啟用中' | '停用中' | '待審核';
   overview: string;
   website: string;
   contacts: Contact[];
@@ -76,6 +82,29 @@ export interface Partner {
   performanceReviews: PerformanceReview[];
   complianceDocuments: ComplianceDocument[];
   contracts: ContractDocument[];
+  flowType: PartnerFlowType;
+  receivableWorkflow: string[];
+  payableWorkflow: string[];
+}
+
+export type ReceivablePayableType = 'receivable' | 'payable';
+
+export interface FinancialDocument {
+    id: string;
+    partnerId: string;
+    contractId?: string;
+    contractName?: string;
+    type: ReceivablePayableType;
+    amount: number;
+    description: string;
+    currentStep: string;
+    createDate: Date;
+    dueDate: Date;
+    history: Array<{
+        step: string;
+        date: Date;
+        user: string;
+    }>;
 }
 
 export type WorkflowNode = {
@@ -100,12 +129,12 @@ export type Workflow = {
   partnerId?: string;
 };
 
-export type ContractStatus = "Active" | "Completed" | "On Hold" | "Terminated";
+export type ContractStatus = "啟用中" | "已完成" | "暫停中" | "已終止";
 
 export interface Payment {
   id: string;
   amount: number;
-  status: "Paid" | "Pending" | "Overdue";
+  status: "已付款" | "待處理" | "已逾期";
   requestDate: Date;
   paidDate?: Date;
 }
@@ -114,7 +143,7 @@ export interface ChangeOrder {
   id: string;
   title: string;
   description: string;
-  status: "Approved" | "Pending" | "Rejected";
+  status: "已核准" | "待處理" | "已拒絕";
   date: Date;
   impact: {
     cost: number;
@@ -130,9 +159,11 @@ export interface ContractVersion {
 
 export interface Contract {
   id: string;
+  customId?: string;
   name: string;
   contractor: string;
   client: string;
+  clientRepresentative?: string;
   startDate: Date;
   endDate: Date;
   totalValue: number;

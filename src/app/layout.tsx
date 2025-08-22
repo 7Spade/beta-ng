@@ -2,10 +2,16 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+});
 
 export const metadata: Metadata = {
-  title: 'Constructo',
-  description: 'Construction project management app',
+  title: 'Constructo - 專案管理平台',
+  description: '專業的營造專案管理應用程式',
 };
 
 export default function RootLayout({
@@ -14,16 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        ></link>
-      </head>
-      <body className={cn('font-body antialiased')}>
+    <html lang="zh-TW" suppressHydrationWarning>
+      <body className={cn('font-sans antialiased', inter.variable)}>
         {children}
         <Toaster />
       </body>

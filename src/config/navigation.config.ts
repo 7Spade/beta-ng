@@ -1,8 +1,8 @@
 /**
- * @project NG-Beta Integrated Platform - 統一整合平台導航配置
+ * @project Beta-NG Integrated Platform - 統一整合平台導航配置
  * @framework Next.js 15+ (App Router)
  * @typescript 5.0+
- * @author NG-Beta Development Team
+ * @author Beta-NG Development Team
  * @created 2025-01-22
  * @updated 2025-01-22
  * @version 1.0.0
@@ -52,7 +52,10 @@ import {
     Users,
     BarChart3,
     Workflow,
-    Settings
+    Settings,
+    ClipboardList,
+    CalendarDays,
+    ArrowLeftRight
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -67,67 +70,80 @@ export interface NavigationItem {
 export const navigationConfig: NavigationItem[] = [
     {
         id: 'analytics',
-        label: 'Analytics',
+        label: '分析',
         icon: BarChart3,
         href: '/analytics'
     },
     {
         id: 'dashboard',
-        label: 'Dashboard',
+        label: '儀表板',
         icon: LayoutDashboard,
         href: '/dashboard'
     },
     {
         id: 'projects',
-        label: 'Projects',
+        label: '專案',
         icon: FolderKanban,
         href: '/projects'
     },
     {
         id: 'contracts',
-        label: 'Contracts',
+        label: '合約',
         icon: Building2,
         href: '/contracts'
     },
     {
         id: 'documents',
-        label: 'Documents',
+        label: '文件',
         icon: FileText,
         href: '/documents'
     },
     {
         id: 'partnerverse',
-        label: 'PartnerVerse',
+        label: '合作夥伴',
         icon: Users,
         href: '/partnerverse',
         children: [
             {
-                id: 'partnerverse-dashboard',
-                label: 'Dashboard',
-                icon: LayoutDashboard,
-                href: '/partnerverse/dashboard'
-            },
-            {
                 id: 'partners',
-                label: 'Partners',
+                label: '夥伴列表',
                 icon: Users,
                 href: '/partnerverse/partners'
             },
             {
-                id: 'workflows',
-                label: 'Workflows',
-                icon: Workflow,
-                href: '/partnerverse/workflows'
+                id: 'receivable-payable',
+                label: '應收應付系統',
+                icon: ArrowLeftRight,
+                href: '/partnerverse/receivable-payable'
             }
         ]
     },
-
+    {
+        id: 'team',
+        label: '內部團隊',
+        icon: Users,
+        href: '/team',
+        children: [
+            {
+                id: 'members',
+                label: '同伴列表',
+                icon: ClipboardList,
+                href: '/team/members'
+            },
+            {
+                id: 'schedule',
+                label: '排班表',
+                icon: CalendarDays,
+                href: '/team/schedule'
+            }
+        ]
+    }
 ]
 
 export const footerNavigationConfig: NavigationItem[] = [
     {
         id: 'settings',
-        label: 'Settings',
+        label: '設定',
         icon: Settings,
         href: '/settings'
     }
