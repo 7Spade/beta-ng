@@ -23,6 +23,7 @@ import { generateSkillSuggestion } from '@/ai/flows/generate-skill-flow';
 import { Loader2, Wand2, Cpu } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
 
 const skillSchema = z.object({
   name: z.string().min(2, '技能名稱至少需要 2 個字元。'),
