@@ -147,7 +147,7 @@ export const navigationConfig: NavigationItem[] = [
                 id: 'knowledge-base',
                 label: '工法工序庫',
                 icon: BookOpen,
-                href: '/knowledge-base'
+                href: '/team/knowledge-base'
             },
         
         ]

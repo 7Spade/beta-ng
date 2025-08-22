@@ -1,5 +1,6 @@
 
 
+
 export type TaskStatus = '待處理' | '進行中' | '已完成';
 
 export interface Task {
@@ -190,4 +191,14 @@ export interface Contract {
   payments: Payment[];
   changeOrders: ChangeOrder[];
   versions: ContractVersion[];
+}
+
+export interface KnowledgeBaseEntry {
+  id: string;
+  title: string;
+  category: string;
+  content: string;
+  tags?: string[];
+  createdAt: any; // Firestore Timestamp
+  updatedAt: any; // Firestore Timestamp
 }
