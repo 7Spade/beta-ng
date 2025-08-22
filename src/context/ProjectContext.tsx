@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { Project, Task, TaskStatus } from '@/lib/types';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, writeBatch, Timestamp, onSnapshot } from "firebase/firestore";
+import { collection, getDocs, doc, writeBatch, Timestamp } from "firebase/firestore";
 
 interface ProjectContextType {
   projects: Project[];
@@ -42,15 +42,24 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
       }));
   }
 
-  useEffect(() => {
-    const unsub = onSnapshot(collection(db, "projects"), (querySnapshot) => {
+  const fetchProjects = useCallback(async () => {
+    setLoading(true);
+    try {
+        const querySnapshot = await getDocs(collection(db, "projects"));
         const projectsData = processFirestoreProjects(querySnapshot.docs);
         setProjects(projectsData);
+    } catch (error) {
+        console.error("Error fetching projects: ", error);
+        // It's a good practice to handle the error, e.g., show a toast notification
+    } finally {
         setLoading(false);
-    });
-
-    return () => unsub();
+    }
   }, []);
+
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
 
   const findProject = useCallback((projectId: string) => {
@@ -67,6 +76,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     });
 
     await batch.commit();
+    await fetchProjects(); // Refetch projects after adding
   };
 
   const updateTaskStatus = async (projectId: string, taskId: string, status: TaskStatus) => {
@@ -90,6 +100,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     const batch = writeBatch(db);
     batch.update(projectRef, { tasks: newTasks });
     await batch.commit();
+    await fetchProjects(); // Refetch projects after updating
   };
   
   const addTask = async (projectId: string, parentTaskId: string | null, taskTitle: string, quantity: number, unitPrice: number) => {
@@ -127,6 +138,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     const batch = writeBatch(db);
     batch.update(projectRef, { tasks: newTasks });
     await batch.commit();
+    await fetchProjects(); // Refetch projects after adding
   }
 
   return (
