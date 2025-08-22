@@ -226,20 +226,15 @@ export const ReceivablePayableSystem: React.FC = () => {
         const updatedHistory = [...(documentData.history || []), newHistoryEntry];
     
         try {
-            await updateDoc(docRef, {
-                currentStep: nextStep,
-                history: updatedHistory,
-            });
-    
             // Check if it's the final step to create a transaction
             if (currentStepIndex + 1 === workflow.length - 1) {
                 const partnerRef = doc(db, 'partners', partner.id);
                 
-                // Fetch the latest partner data to avoid overwriting concurrent changes
+                // Atomically update partner's transactions
                 const partnerSnap = await getDoc(partnerRef);
-                const currentPartnerData = partnerSnap.data() as Partner | undefined;
-                if (!currentPartnerData) throw new Error("找不到合作夥伴資料。");
+                if (!partnerSnap.exists()) throw new Error("找不到合作夥伴資料。");
 
+                const currentPartnerData = partnerSnap.data() as Partner;
                 const newTransaction: Transaction = {
                     id: `txn-${Date.now()}`,
                     date: new Date().toISOString(),
@@ -255,9 +250,18 @@ export const ReceivablePayableSystem: React.FC = () => {
                 });
     
                 toast({ title: "交易已記錄", description: `一筆新的交易已新增至 ${partner.name} 的紀錄中。` });
-            } else {
+            }
+
+            // Update the document step regardless
+             await updateDoc(docRef, {
+                currentStep: nextStep,
+                history: updatedHistory,
+            });
+
+            if (currentStepIndex + 1 < workflow.length - 1) {
                 toast({ title: "流程更新", description: `單據 #${documentData.id.substring(0,5)} 已移至下一步驟: ${nextStep}` });
             }
+
         } catch (error) {
             console.error("更新單據或交易時發生錯誤:", error);
             toast({ variant: 'destructive', title: '錯誤', description: '更新流程失敗。' });
@@ -402,3 +406,5 @@ export const ReceivablePayableSystem: React.FC = () => {
         </div>
     );
 };
+
+    
