@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { generateSubtasks } from '@/ai/flows/generate-subtasks-flow';
 import { Button } from '@/components/ui/button';
 import { Loader, PlusCircle, X } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '../../ui/alert';
 import { useToast } from '@/hooks/use-toast';
 
 interface AISubtaskSuggestionsProps {

@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import type { ExtractWorkItemsOutput } from '@/ai/flows/extract-work-items';
-import { Badge } from '../ui/badge';
+import { Badge } from '../../ui/badge';
 
 export type WorkItem = ExtractWorkItemsOutput['workItems'][0];
 

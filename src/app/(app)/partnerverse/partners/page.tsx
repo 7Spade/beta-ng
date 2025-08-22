@@ -10,10 +10,10 @@ import type { Partner, Contact } from '@/lib/types';
 import type { Role } from '@/lib/roles';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { PartnerList } from '@/components/partnerverse/partners/partner-list';
-import { PartnerProfile } from '@/components/partnerverse/partners/partner-profile';
-import { PartnerForm } from '@/components/partnerverse/partners/forms/partner-form';
-import { ContactForm } from '@/components/partnerverse/partners/forms/contact-form';
+import { PartnerList } from '@/components/features/partnerverse/partners/partner-list';
+import { PartnerProfile } from '@/components/features/partnerverse/partners/partner-profile';
+import { PartnerForm } from '@/components/features/partnerverse/partners/forms/partner-form';
+import { ContactForm } from '@/components/features/partnerverse/partners/forms/contact-form';
 
 
 const PartnersPage: FC = () => {

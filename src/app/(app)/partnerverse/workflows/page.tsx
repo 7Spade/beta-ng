@@ -1,6 +1,6 @@
 'use client';
 
-import { WorkflowBuilder } from '@/components/partnerverse/workflows/workflow-builder';
+import { WorkflowBuilder } from '@/components/features/partnerverse/workflows/workflow-builder';
 import { db } from '@/lib/firebase';
 import type { Partner } from '@/lib/types';
 import { collection, getDocs } from 'firebase/firestore';

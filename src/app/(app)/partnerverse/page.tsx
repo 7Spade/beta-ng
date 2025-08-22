@@ -5,7 +5,7 @@ import type { Partner } from '@/lib/types';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dashboard } from '@/components/partnerverse/dashboard/dashboard';
+import { Dashboard } from '@/components/features/partnerverse/dashboard/dashboard';
 import { useRouter } from 'next/navigation';
 
 const PartnerVersePage: FC = () => {

@@ -26,15 +26,15 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { formatDistanceToNow } from 'date-fns';
-import { Input } from '../ui/input';
+import { Input } from '../../ui/input';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '../ui/tooltip';
+} from '../../ui/tooltip';
 import { AISubtaskSuggestions } from './ai-subtask-suggestions';
-import { Badge } from '../ui/badge';
+import { Badge } from '../../ui/badge';
 
 interface TaskItemProps {
   task: Task;

@@ -16,7 +16,7 @@ import type { FC } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import type { Partner } from '@/lib/types';
-import { Button } from '../../ui/button';
+import { Button } from '../../../ui/button';
 import { ArrowUpRight, Users, CheckCircle, XCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
 

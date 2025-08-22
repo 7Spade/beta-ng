@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Wand2, Loader2, FileUp, CheckCircle2, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { summarizeContract, type SummarizeContractInput } from '@/ai/flows/summarize-contract';
-import { Skeleton } from '../ui/skeleton';
+import { Skeleton } from '../../ui/skeleton';
 
 export function AiSummarizerDialog() {
   const [isOpen, setIsOpen] = useState(false);

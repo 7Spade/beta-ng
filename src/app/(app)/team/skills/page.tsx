@@ -1,7 +1,7 @@
 
 'use client';
 
-import { SkillsList } from '@/components/team/skills/skills-list';
+import { SkillsList } from '@/components/features/team/skills/skills-list';
 
 export default function TeamSkillsPage() {
   return (

@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import type { Partner } from '@/lib/types';
 import type { Role } from '@/lib/roles';
-import { Button } from '../../ui/button';
+import { Button } from '../../../ui/button';
 import { Plus, Search } from 'lucide-react';
 
 interface PartnerListProps {

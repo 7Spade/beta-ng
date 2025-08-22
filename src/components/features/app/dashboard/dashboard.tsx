@@ -1,5 +1,5 @@
 /**
- * @project Beta-NG Integrated Platform - 統一整合平台分析儀表板
+ * @project Beta-NG Integrated Platform - 統一整合平台專案儀表板
  * @framework Next.js 15+ (App Router)
  * @typescript 5.0+
  * @author Beta-NG Development Team
@@ -7,19 +7,18 @@
  * @updated 2025-01-22
  * @version 1.0.0
  * 
- * @fileoverview 分析儀表板元件
- * @description 提供專案統計、任務完成度分析、即將到期的專案提醒，以及各專案的進度圖表展示。此元件用於主分析儀表板。
+ * @fileoverview 專案儀表板元件
+ * @description 顯示專案統計、任務完成度分析、即將到期的專案提醒，以及各專案的進度圖表。
  */
-
 'use client';
 
 import { useProjects } from '@/context/ProjectContext';
-import { ProjectProgressChart } from '@/components/app/project-progress-chart';
+import { ProjectProgressChart } from '@/components/features/app/project-progress-chart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { differenceInDays, format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export function AnalyticsDashboard() {
+export function ProjectDashboard() {
   const { projects, loading } = useProjects();
 
   if (loading) {
@@ -40,11 +39,11 @@ export function AnalyticsDashboard() {
           <Skeleton className="h-80" />
         </div>
       </div>
-    )
+    );
   }
 
   const totalTasks = projects.reduce((acc, p) => acc + countAllTasks(p.tasks), 0);
-  const completedTasks = projects.reduce((acc, p) => acc + countAllTasks(p.tasks, 'Completed'), 0);
+  const completedTasks = projects.reduce((acc, p) => acc + countAllTasks(p.tasks, '已完成'), 0);
 
   function countAllTasks(tasks: any[], status?: string): number {
     return tasks.reduce((acc, task) => {
@@ -88,7 +87,7 @@ export function AnalyticsDashboard() {
                 {upcomingDeadlines.map(p => (
                   <li key={p.id} className="text-xs flex justify-between">
                     <span>{p.title}</span>
-                    <span className="font-medium">{p.endDate ? format(p.endDate, 'MMM dd, yyyy') : ''}</span>
+                    <span className="font-medium">{p.endDate ? format(p.endDate, 'yyyy-MM-dd') : ''}</span>
                   </li>
                 ))}
               </ul>

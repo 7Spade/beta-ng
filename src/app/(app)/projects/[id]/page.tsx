@@ -2,7 +2,7 @@
 
 import { useProjects } from '@/context/ProjectContext';
 import { useParams } from 'next/navigation';
-import { TaskItem } from '@/components/app/task-item';
+import { TaskItem } from '@/components/features/app/task-item';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';

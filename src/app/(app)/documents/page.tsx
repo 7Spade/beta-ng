@@ -53,7 +53,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { extractDataFromDocument } from "@/app/actions/documents.actions";
 import { createProjectAndContractFromDocument } from "@/app/actions/contracts.actions";
-import { WorkItemsTable, type WorkItem } from "@/components/documents/work-items-table";
+import { WorkItemsTable, type WorkItem } from "@/components/features/documents/work-items-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";

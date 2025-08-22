@@ -13,10 +13,10 @@ import { GitBranch, CheckCircle, PlayCircle, StopCircle, Bot, ArrowLeftRight, Pl
 import { OptimizationAssistant } from './optimization-assistant';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, doc, setDoc, deleteDoc } from 'firebase/firestore';
-import { Skeleton } from '../../ui/skeleton';
+import { Skeleton } from '../../../ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Separator } from '../../ui/separator';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../../ui/alert-dialog';
+import { Separator } from '../../../ui/separator';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../../../ui/alert-dialog';
 
 
 const nodeIcons = {

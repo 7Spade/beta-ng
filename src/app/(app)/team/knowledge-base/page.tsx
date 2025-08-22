@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { EntryFormDialog } from '@/components/team/knowledge-base/entry-form-dialog';
+import { EntryFormDialog } from '@/components/features/team/knowledge-base/entry-form-dialog';
 import { Badge } from '@/components/ui/badge';
 
 export default function KnowledgeBasePage() {

@@ -3,7 +3,7 @@
 import { db } from "@/lib/firebase";
 import { writeBatch, collection, doc, Timestamp } from "firebase/firestore";
 import type { Task, Project, Contract } from "@/lib/types";
-import type { WorkItem } from "@/components/documents/work-items-table";
+import type { WorkItem } from "@/components/features/documents/work-items-table";
 
 interface DocDetails {
     customId: string;

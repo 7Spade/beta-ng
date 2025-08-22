@@ -14,9 +14,9 @@
 
 'use client';
 
-import { ProjectDashboard } from '@/components/app/dashboard/dashboard';
-import { AiUsageLog } from '@/components/dashboard/ai-usage-log';
-import { ContractDashboard } from '@/components/contracts/dashboard/dashboard';
+import { ProjectDashboard } from '@/components/features/app/dashboard/dashboard';
+import { AiUsageLog } from '@/components/features/dashboard/ai-usage-log';
+import { ContractDashboard } from '@/components/features/contracts/dashboard/dashboard';
 import PartnerVersePage from '@/app/(app)/partnerverse/page';
 import { Separator } from '@/components/ui/separator';
 

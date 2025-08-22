@@ -6,7 +6,7 @@ import { useProjects } from '@/context/ProjectContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { CreateProjectDialog } from '@/components/app/create-project-dialog';
+import { CreateProjectDialog } from '@/components/features/app/create-project-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Task } from '@/lib/types';
 
