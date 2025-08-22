@@ -152,20 +152,15 @@ export const footerNavigationConfig: NavigationItem[] = [
 // 工具函數：根據路徑找到對應的導航項目
 export function findNavigationItemByPath(path: string): NavigationItem | null {
     for (const item of navigationConfig) {
-        if (path === item.href || path.startsWith(item.href + '/')) {
-            return item
+        if (item.href === path) {
+            return item;
         }
-
         if (item.children) {
-            for (const child of item.children) {
-                if (path === child.href || path.startsWith(child.href + '/')) {
-                    return child
-                }
-            }
+            const childItem = item.children.find(child => path.startsWith(child.href));
+            if (childItem) return childItem;
         }
     }
-
-    return null
+    return null;
 }
 
 // 工具函數：檢查路徑是否應該展開某個區段
@@ -183,5 +178,8 @@ export function shouldExpandSection(sectionId: string, currentPath: string): boo
 
 // 工具函數：檢查路徑是否為活躍狀態
 export function isPathActive(itemPath: string, currentPath: string): boolean {
+    if (itemPath === '/partnerverse') {
+        return currentPath.startsWith('/partnerverse');
+    }
     return currentPath === itemPath || currentPath.startsWith(itemPath + '/')
 }
