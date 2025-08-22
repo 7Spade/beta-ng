@@ -6,13 +6,13 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  "projectId": "acc-ng",
-  "appId": "1:713375778540:web:9bd4d807b2035ee2bb87c9",
-  "storageBucket": "acc-ng.firebasestorage.app",
-  "apiKey": "AIzaSyD0mftbDKLDXTDttoXUQwnHNQUeJEwADQc",
-  "authDomain": "acc-ng.firebaseapp.com",
+  "projectId": "ngbeta-learn",
+  "appId": "1:240796632166:web:893dda9b3a1341becd59a7",
+  "storageBucket": "ngbeta-learn.firebasestorage.app",
+  "apiKey": "AIzaSyC-itgeQQShEcRda3Gj2ZC5ZUXtM6OUBV8",
+  "authDomain": "ngbeta-learn.firebaseapp.com",
   "measurementId": "G-B5TBVN0H3L",
-  "messagingSenderId": "713375778540"
+  "messagingSenderId": "240796632166"
 };
 
 // Initialize Firebase
