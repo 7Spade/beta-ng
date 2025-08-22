@@ -202,19 +202,19 @@ export const ReceivablePayableSystem: React.FC = () => {
     };
     
     const handleNextStep = async (docId: string) => {
-        const document = documents.find(d => d.id === docId);
-        if (!document) return;
+        const documentData = documents.find(d => d.id === docId);
+        if (!documentData) return;
     
-        const partner = partners.find(p => p.id === document.partnerId);
+        const partner = partners.find(p => p.id === documentData.partnerId);
         if (!partner || !partner.id) return;
     
-        const workflow = document.type === 'receivable' ? partner.receivableWorkflow : partner.payableWorkflow;
+        const workflow = documentData.type === 'receivable' ? partner.receivableWorkflow : partner.payableWorkflow;
         if (!workflow || workflow.length === 0) return;
     
-        const currentStepIndex = workflow.indexOf(document.currentStep);
+        const currentStepIndex = workflow.indexOf(documentData.currentStep);
     
         if (currentStepIndex >= workflow.length - 1) {
-            toast({ variant: 'default', title: '流程完成', description: `單據 #${document.id.substring(0,5)} 已在最終步驟。`});
+            toast({ variant: 'default', title: '流程完成', description: `單據 #${documentData.id.substring(0,5)} 已在最終步驟。`});
             return;
         }
     
@@ -222,7 +222,7 @@ export const ReceivablePayableSystem: React.FC = () => {
         const docRef = doc(db, 'financial_documents', docId);
     
         const newHistoryEntry = { step: nextStep, date: Timestamp.now(), user: "system" };
-        const updatedHistory = [...(document.history || []), newHistoryEntry];
+        const updatedHistory = [...(documentData.history || []), newHistoryEntry];
     
         try {
             await updateDoc(docRef, {
@@ -242,9 +242,9 @@ export const ReceivablePayableSystem: React.FC = () => {
                 const newTransaction: Transaction = {
                     id: `txn-${Date.now()}`,
                     date: new Date().toISOString(),
-                    amount: document.amount,
+                    amount: documentData.amount,
                     status: '已完成',
-                    description: `${document.type === 'receivable' ? '應收款' : '應付款'}單據 #${document.id.substring(0, 5)} - ${document.description}`
+                    description: `${documentData.type === 'receivable' ? '應收款' : '應付款'}單據 #${documentData.id.substring(0, 5)} - ${documentData.description}`
                 };
     
                 const updatedTransactions = [...(currentPartnerData.transactions || []), newTransaction];
@@ -252,15 +252,10 @@ export const ReceivablePayableSystem: React.FC = () => {
                 await updateDoc(partnerRef, {
                     transactions: updatedTransactions
                 });
-
-                // Update local state to reflect the change immediately
-                setPartners(prevPartners => prevPartners.map(p => 
-                    p.id === partner.id ? { ...p, transactions: updatedTransactions } : p
-                ));
     
                 toast({ title: "交易已記錄", description: `一筆新的交易已新增至 ${partner.name} 的紀錄中。` });
             } else {
-                toast({ title: "流程更新", description: `單據 #${document.id.substring(0,5)} 已移至下一步驟: ${nextStep}` });
+                toast({ title: "流程更新", description: `單據 #${documentData.id.substring(0,5)} 已移至下一步驟: ${nextStep}` });
             }
         } catch (error) {
             console.error("更新單據或交易時發生錯誤:", error);
