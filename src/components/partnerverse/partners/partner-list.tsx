@@ -10,8 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import type { Partner } from '@/lib/types';
 import type { Role } from '@/lib/roles';
 import { Button } from '../../ui/button';
-import { ListFilter, Plus } from 'lucide-react';
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../../ui/dropdown-menu';
+import { Plus, Search } from 'lucide-react';
 
 interface PartnerListProps {
   partners: Partner[];
@@ -44,43 +43,60 @@ export const PartnerList: FC<PartnerListProps> = ({ partners, onSelectPartner, u
     }
   };
 
+  const categories = useMemo(() => ['All', ...Array.from(new Set(partners.map(p => p.category)))], [partners]);
+  const statuses = useMemo(() => ['All', ...Array.from(new Set(partners.map(p => p.status)))], [partners]);
+
 
   return (
     <div className="space-y-6">
-       <div className="flex items-center">
-            <div className="flex-1">
+       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
                 <h2 className="text-3xl font-bold tracking-tight">合作夥伴</h2>
-                <p className="text-muted-foreground">檢視和管理您的業務關係。</p>
+                <p className="text-muted-foreground">檢視、篩選並管理您的所有業務關係。</p>
             </div>
-            <div className="ml-auto flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 gap-1">
-                    <ListFilter className="h-3.5 w-3.5" />
-                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                      篩選
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>篩選條件</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                   <DropdownMenuCheckboxItem checked>
-                    狀態
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem>類別</DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              {userRole === 'Admin' && (
-                <Button size="sm" className="h-8 gap-1" onClick={onAddPartner}>
-                  <Plus className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    新增夥伴
-                  </span>
-                </Button>
-              )}
-            </div>
-          </div>
+            {userRole === 'Admin' && (
+              <Button size="sm" className="h-9 gap-1" onClick={onAddPartner}>
+                <Plus className="h-4 w-4" />
+                <span>
+                  新增夥伴
+                </span>
+              </Button>
+            )}
+        </div>
+        
+        <Card>
+            <CardContent className="p-4 flex flex-col md:flex-row gap-4">
+                 <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                        placeholder="搜尋夥伴名稱..."
+                        className="pl-9"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <div className="flex gap-4">
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="w-full md:w-[160px]">
+                            <SelectValue placeholder="篩選狀態" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="All">所有狀態</SelectItem>
+                            {statuses.filter(s => s !== 'All').map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                        <SelectTrigger className="w-full md:w-[180px]">
+                            <SelectValue placeholder="篩選類別" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="All">所有類別</SelectItem>
+                           {categories.filter(c => c !== 'All').map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </CardContent>
+        </Card>
 
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -109,7 +125,7 @@ export const PartnerList: FC<PartnerListProps> = ({ partners, onSelectPartner, u
         ))}
       </div>
        {filteredPartners.length === 0 && (
-          <div className="text-center col-span-full py-16">
+          <div className="col-span-full text-center py-16 border-2 border-dashed rounded-lg">
             <p className="text-muted-foreground">找不到符合條件的合作夥伴。請嘗試調整您的篩選條件。</p>
           </div>
         )}
