@@ -4,8 +4,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, addDoc, updateDoc, Timestamp, onSnapshot, query, where } from 'firebase/firestore';
-import type { Partner, FinancialDocument, ReceivablePayableType, Contract } from '@/lib/types';
+import { collection, getDocs, doc, addDoc, updateDoc, Timestamp, onSnapshot, query, where, arrayUnion } from 'firebase/firestore';
+import type { Partner, FinancialDocument, ReceivablePayableType, Contract, Transaction } from '@/lib/types';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -204,27 +204,61 @@ export const ReceivablePayableSystem: React.FC = () => {
     const handleNextStep = async (docId: string) => {
         const document = documents.find(d => d.id === docId);
         if (!document) return;
-
+    
         const partner = partners.find(p => p.id === document.partnerId);
         if (!partner) return;
-        
+    
         const workflow = document.type === 'receivable' ? partner.receivableWorkflow : partner.payableWorkflow;
         const currentStepIndex = workflow.indexOf(document.currentStep);
-
-        if (currentStepIndex < workflow.length - 1) {
-            const nextStep = workflow[currentStepIndex + 1];
-            const docRef = doc(db, 'financial_documents', docId);
-
-            const newHistoryEntry = { step: nextStep, date: Timestamp.now(), user: "system" };
-            const updatedHistory = [...(document.history || []), newHistoryEntry];
-            
-            await updateDoc(docRef, { 
+    
+        if (currentStepIndex >= workflow.length - 1) {
+            toast({ variant: 'default', title: '流程完成', description: `單據 #${document.id.substring(0,5)} 已在最終步驟。`});
+            return;
+        }
+    
+        const nextStep = workflow[currentStepIndex + 1];
+        const docRef = doc(db, 'financial_documents', docId);
+    
+        const newHistoryEntry = { step: nextStep, date: Timestamp.now(), user: "system" };
+        const updatedHistory = [...(document.history || []), newHistoryEntry];
+    
+        try {
+            await updateDoc(docRef, {
                 currentStep: nextStep,
                 history: updatedHistory,
             });
-            toast({ title: "流程更新", description: `單據 #${document.id.substring(0,5)} 已移至下一步驟: ${nextStep}`});
-        } else {
-             toast({ variant: 'default', title: '流程完成', description: `單據 #${document.id.substring(0,5)} 已在最終步驟。`});
+    
+            // Check if it's the final step
+            if (currentStepIndex + 1 === workflow.length - 1) {
+                const partnerRef = doc(db, 'partners', document.partnerId);
+                const newTransaction: Omit<Transaction, 'id'> = {
+                    date: new Date().toISOString(),
+                    amount: document.amount,
+                    status: '已完成',
+                    description: `${document.type === 'receivable' ? '應收款' : '應付款'}單據 #${document.id.substring(0, 5)} - ${document.description}`
+                };
+    
+                // Firestore doesn't have a direct way to add to an array without a transaction
+                // and ensuring uniqueness of an object is complex client-side.
+                // A common pattern is to use arrayUnion, but it requires the exact object.
+                // For simplicity here, we'll read, update, and write.
+                // In a real-world scenario, a Cloud Function would be more robust.
+                const updatedTransactions = arrayUnion({
+                    id: `txn-${Date.now()}`, // Simple unique ID
+                    ...newTransaction
+                });
+    
+                await updateDoc(partnerRef, {
+                    transactions: updatedTransactions
+                });
+    
+                toast({ title: "交易已記錄", description: `一筆新的交易已新增至 ${partner.name} 的紀錄中。` });
+            } else {
+                toast({ title: "流程更新", description: `單據 #${document.id.substring(0,5)} 已移至下一步驟: ${nextStep}` });
+            }
+        } catch (error) {
+            console.error("更新單據或交易時發生錯誤:", error);
+            toast({ variant: 'destructive', title: '錯誤', description: '更新流程失敗。' });
         }
     };
 
