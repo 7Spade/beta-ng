@@ -69,7 +69,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur sm:px-6">
-        <Logo />
+        <Logo className="h-6 w-6" />
         <div className="ml-auto flex items-center gap-2">
           <AiSummarizerDialog />
           <Button>
