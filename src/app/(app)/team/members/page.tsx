@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Mail, Phone, PlusCircle } from 'lucide-react';
-import { CreateMemberDialog } from '@/components/team/create-member-dialog';
+import { CreateMemberDialog } from '@/components/team/members/create-member-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
