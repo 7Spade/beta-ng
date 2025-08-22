@@ -53,7 +53,7 @@ export interface PerformanceReview {
     reviewer: string;
 }
 
-export interface Contract {
+export interface ContractDocument {
     id: string;
     title: string;
     startDate: string;
@@ -75,7 +75,7 @@ export interface Partner {
   joinDate: string;
   performanceReviews: PerformanceReview[];
   complianceDocuments: ComplianceDocument[];
-  contracts: Contract[];
+  contracts: ContractDocument[];
 }
 
 export type WorkflowNode = {
@@ -99,3 +99,46 @@ export type Workflow = {
   edges: WorkflowEdge[];
   partnerId?: string;
 };
+
+export type ContractStatus = "Active" | "Completed" | "On Hold" | "Terminated";
+
+export interface Payment {
+  id: string;
+  amount: number;
+  status: "Paid" | "Pending" | "Overdue";
+  requestDate: Date;
+  paidDate?: Date;
+}
+
+export interface ChangeOrder {
+  id: string;
+  title: string;
+  description: string;
+  status: "Approved" | "Pending" | "Rejected";
+  date: Date;
+  impact: {
+    cost: number;
+    scheduleDays: number;
+  };
+}
+
+export interface ContractVersion {
+  version: number;
+  date: Date;
+  changeSummary: string;
+}
+
+export interface Contract {
+  id: string;
+  name: string;
+  contractor: string;
+  client: string;
+  startDate: Date;
+  endDate: Date;
+  totalValue: number;
+  status: ContractStatus;
+  scope: string;
+  payments: Payment[];
+  changeOrders: ChangeOrder[];
+  versions: ContractVersion[];
+}
