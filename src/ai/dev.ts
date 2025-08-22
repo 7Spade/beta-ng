@@ -3,3 +3,5 @@ import './flows/extract-work-items';
 import './flows/generate-subtasks-flow';
 import './flows/summarize-contract.ts';
 import './flows/workflow-optimization';
+import './flows/generate-skill-flow';
+import './flows/generate-knowledge-entry-flow';

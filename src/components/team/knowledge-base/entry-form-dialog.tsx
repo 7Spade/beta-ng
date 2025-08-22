@@ -12,8 +12,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { handleDeleteKnowledgeBaseEntry } from '@/app/actions/knowledge.actions';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Wand2, Loader2, Cpu } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { generateKnowledgeEntry } from '@/ai/flows/generate-knowledge-entry-flow';
+import { Badge } from '@/components/ui/badge';
 
 
 const entrySchema = z.object({
@@ -35,6 +37,8 @@ interface EntryFormDialogProps {
 export function EntryFormDialog({ isOpen, onOpenChange, onSave, entry }: EntryFormDialogProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedTokens, setGeneratedTokens] = useState<number | null>(null);
   const { toast } = useToast();
 
   const form = useForm<EntryFormValues>({
@@ -52,11 +56,12 @@ export function EntryFormDialog({ isOpen, onOpenChange, onSave, entry }: EntryFo
       } else {
         form.reset({ title: '', category: '', content: '', tags: '' });
       }
+      setGeneratedTokens(null);
     }
   }, [entry, isOpen, form]);
 
   const handleDialogChange = (open: boolean) => {
-    if (isSaving || isDeleting) return;
+    if (isSaving || isDeleting || isGenerating) return;
     onOpenChange(open);
   };
 
@@ -86,6 +91,29 @@ export function EntryFormDialog({ isOpen, onOpenChange, onSave, entry }: EntryFo
       setIsDeleting(false);
   }
 
+  async function handleAiGenerate() {
+    const title = form.getValues('title');
+    if (!title) {
+        toast({ title: "缺少標題", description: "請先輸入工法標題以生成內容。", variant: "destructive" });
+        return;
+    }
+    setIsGenerating(true);
+    setGeneratedTokens(null);
+    try {
+        const result = await generateKnowledgeEntry({ title });
+        form.setValue('category', result.category);
+        form.setValue('content', result.content);
+        form.setValue('tags', result.tags.join(', '));
+        setGeneratedTokens(result.totalTokens);
+        toast({ title: "AI 生成成功！" });
+    } catch(err) {
+        console.error(err);
+        toast({ title: "AI 生成失敗", description: "無法生成內容，請稍後再試。", variant: "destructive" });
+    } finally {
+        setIsGenerating(false);
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogChange}>
       <DialogContent className="sm:max-w-2xl">
@@ -97,30 +125,44 @@ export function EntryFormDialog({ isOpen, onOpenChange, onSave, entry }: EntryFo
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>標題</FormLabel>
-                    <FormControl><Input placeholder="例如：混凝土澆置標準作業程序" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>分類</FormLabel>
-                    <FormControl><Input placeholder="例如：結構工程" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>標題</FormLabel>
+                  <FormControl>
+                    <div className="flex gap-2">
+                      <Input placeholder="例如：混凝土澆置標準作業程序" {...field} />
+                      <Button type="button" variant="outline" onClick={handleAiGenerate} disabled={isGenerating}>
+                        {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                        <span className="ml-2 hidden sm:inline">{isGenerating ? '生成中...' : 'AI 生成內容'}</span>
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {generatedTokens !== null && (
+              <div className="flex justify-end">
+                  <Badge variant="secondary" className="flex items-center gap-2">
+                      <Cpu className="w-4 h-4" />
+                      <span>{generatedTokens.toLocaleString()} tokens</span>
+                  </Badge>
+              </div>
+            )}
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>分類</FormLabel>
+                  <FormControl><Input placeholder="例如：結構工程" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
              <FormField
               control={form.control}
               name="content"
