@@ -1,9 +1,9 @@
 /**
- * Contract Statistics Service
+ * Contract Statistics Service Implementation
  * Handles contract-related statistics and analytics calculations
  */
 
-import { Contract, ContractFilters } from '../../types/entities/contract.types';
+import { Contract } from '../../types/entities/contract.types';
 import { DashboardStats, IContractStatsService } from '../../types/services/contract.service.types';
 import { ContractRepository } from '../../repositories/contracts/contract.repository';
 
@@ -23,23 +23,29 @@ export class ContractStatsService implements IContractStatsService {
   async getContractDashboardStats(): Promise<DashboardStats> {
     try {
       // Get all contracts for comprehensive statistics
-      const allContracts = await this.contractRepository.findAll();
+      const contracts = await this.contractRepository.findAll();
       
       // Calculate basic statistics
-      const totalContracts = allContracts.length;
-      const activeContracts = allContracts.filter(c => c.status === '啟用中').length;
-      const completedContracts = allContracts.filter(c => c.status === '已完成').length;
-      const totalValue = allContracts.reduce((acc, contract) => acc + this.calculateContractValue(contract), 0);
+      const totalContracts = contracts.length;
+      const activeContracts = contracts.filter(c => c.status === '啟用中').length;
+      const completedContracts = contracts.filter(c => c.status === '已完成').length;
+      
+      // Calculate total value including change orders
+      const totalValue = contracts.reduce((acc, contract) => {
+        return acc + this.calculateContractValue(contract);
+      }, 0);
+      
+      // Calculate average value
       const averageValue = totalContracts > 0 ? totalValue / totalContracts : 0;
-
-      // Calculate monthly revenue (current month)
-      const monthlyRevenue = this.calculateMonthlyRevenue(allContracts);
-
+      
+      // Calculate monthly revenue (from active contracts)
+      const monthlyRevenue = this.calculateMonthlyRevenue(contracts);
+      
       // Get status distribution
-      const statusDistribution = this.getStatusDistribution(allContracts);
-
+      const statusDistribution = this.getStatusDistribution(contracts);
+      
       // Get recent contracts (last 5)
-      const recentContracts = this.getRecentContracts(allContracts, 5);
+      const recentContracts = this.getRecentContracts(contracts, 5);
 
       return {
         totalContracts,
@@ -52,8 +58,8 @@ export class ContractStatsService implements IContractStatsService {
         recentContracts,
       };
     } catch (error) {
-      console.error('Error calculating dashboard stats:', error);
-      throw new Error(`Failed to calculate dashboard stats: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error getting contract dashboard stats:', error);
+      throw new Error(`Failed to get dashboard statistics: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -64,7 +70,7 @@ export class ContractStatsService implements IContractStatsService {
     let totalValue = contract.totalValue;
 
     // Add approved change orders
-    if (contract.changeOrders) {
+    if (contract.changeOrders && contract.changeOrders.length > 0) {
       const approvedChangeOrders = contract.changeOrders.filter(co => co.status === '已核准');
       totalValue += approvedChangeOrders.reduce((sum, co) => sum + co.impact.cost, 0);
     }
@@ -73,42 +79,54 @@ export class ContractStatsService implements IContractStatsService {
   }
 
   /**
-   * Calculate monthly revenue for current month
+   * Calculate monthly revenue from active contracts
    */
   calculateMonthlyRevenue(contracts: Contract[]): number {
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
 
-    // Calculate revenue from contracts that are active in current month
-    return contracts
-      .filter(contract => {
-        const startDate = new Date(contract.startDate);
-        const endDate = new Date(contract.endDate);
-        
-        // Check if contract is active during current month
-        const contractStartsBeforeOrDuringMonth = 
-          startDate.getFullYear() < currentYear || 
-          (startDate.getFullYear() === currentYear && startDate.getMonth() <= currentMonth);
-        
-        const contractEndsAfterOrDuringMonth = 
-          endDate.getFullYear() > currentYear || 
-          (endDate.getFullYear() === currentYear && endDate.getMonth() >= currentMonth);
+    // Filter contracts that are active and have payments in current month
+    const activeContracts = contracts.filter(c => c.status === '啟用中');
+    
+    let monthlyRevenue = 0;
 
-        return contractStartsBeforeOrDuringMonth && contractEndsAfterOrDuringMonth;
-      })
-      .reduce((total, contract) => {
-        // Calculate monthly portion of contract value
+    activeContracts.forEach(contract => {
+      if (contract.payments && contract.payments.length > 0) {
+        // Sum payments made in current month
+        const currentMonthPayments = contract.payments.filter(payment => {
+          if (!payment.paidDate) return false;
+          
+          const paymentDate = payment.paidDate instanceof Date ? payment.paidDate : new Date(payment.paidDate);
+          return paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear;
+        });
+
+        monthlyRevenue += currentMonthPayments.reduce((sum, payment) => sum + payment.amount, 0);
+      } else {
+        // If no payments recorded, estimate based on contract duration
         const contractValue = this.calculateContractValue(contract);
-        const contractDurationMonths = this.getContractDurationInMonths(contract);
-        const monthlyValue = contractDurationMonths > 0 ? contractValue / contractDurationMonths : contractValue;
+        const startDate = contract.startDate instanceof Date ? contract.startDate : new Date(contract.startDate);
+        const endDate = contract.endDate instanceof Date ? contract.endDate : new Date(contract.endDate);
         
-        return total + monthlyValue;
-      }, 0);
+        // Calculate contract duration in months
+        const durationMonths = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)));
+        
+        // Check if current month is within contract period
+        const contractStart = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+        const contractEnd = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+        const currentMonthStart = new Date(currentYear, currentMonth, 1);
+        
+        if (currentMonthStart >= contractStart && currentMonthStart <= contractEnd) {
+          monthlyRevenue += contractValue / durationMonths;
+        }
+      }
+    });
+
+    return monthlyRevenue;
   }
 
   /**
-   * Get status distribution across all contracts
+   * Get distribution of contracts by status
    */
   getStatusDistribution(contracts: Contract[]): Record<string, number> {
     const distribution: Record<string, number> = {
@@ -119,218 +137,175 @@ export class ContractStatsService implements IContractStatsService {
     };
 
     contracts.forEach(contract => {
-      distribution[contract.status] = (distribution[contract.status] || 0) + 1;
+      if (distribution.hasOwnProperty(contract.status)) {
+        distribution[contract.status]++;
+      } else {
+        distribution[contract.status] = 1;
+      }
     });
 
     return distribution;
   }
 
   /**
-   * Get recent contracts sorted by creation date
+   * Get most recent contracts
    */
   getRecentContracts(contracts: Contract[], limit: number = 5): Contract[] {
     return contracts
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .sort((a, b) => {
+        const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+        const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+        return dateB.getTime() - dateA.getTime();
+      })
       .slice(0, limit);
   }
 
   /**
-   * Calculate contract duration in months
+   * Calculate contract completion percentage
    */
-  private getContractDurationInMonths(contract: Contract): number {
-    const startDate = new Date(contract.startDate);
-    const endDate = new Date(contract.endDate);
-    
-    const yearDiff = endDate.getFullYear() - startDate.getFullYear();
-    const monthDiff = endDate.getMonth() - startDate.getMonth();
-    
-    return yearDiff * 12 + monthDiff + 1; // +1 to include both start and end months
+  calculateCompletionPercentage(contract: Contract): number {
+    const now = new Date();
+    const startDate = contract.startDate instanceof Date ? contract.startDate : new Date(contract.startDate);
+    const endDate = contract.endDate instanceof Date ? contract.endDate : new Date(contract.endDate);
+
+    if (now < startDate) return 0;
+    if (now > endDate) return 100;
+
+    const totalDuration = endDate.getTime() - startDate.getTime();
+    const elapsed = now.getTime() - startDate.getTime();
+
+    return Math.round((elapsed / totalDuration) * 100);
   }
 
   /**
    * Get contracts by value range
    */
-  async getContractsByValueRange(minValue: number, maxValue: number): Promise<Contract[]> {
-    try {
-      const filters: ContractFilters = {
-        minValue,
-        maxValue,
-      };
+  getContractsByValueRange(contracts: Contract[]): Record<string, number> {
+    const ranges = {
+      'Under 100K': 0,
+      '100K - 500K': 0,
+      '500K - 1M': 0,
+      '1M - 5M': 0,
+      'Over 5M': 0,
+    };
+
+    contracts.forEach(contract => {
+      const value = this.calculateContractValue(contract);
       
-      const result = await this.contractRepository.findContracts({ filters });
-      return result.contracts;
-    } catch (error) {
-      console.error('Error getting contracts by value range:', error);
-      throw new Error(`Failed to get contracts by value range: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Get contract performance metrics
-   */
-  async getContractPerformanceMetrics(): Promise<{
-    onTimeCompletionRate: number;
-    averageContractDuration: number;
-    totalChangeOrderImpact: number;
-    averageChangeOrdersPerContract: number;
-  }> {
-    try {
-      const allContracts = await this.contractRepository.findAll();
-      const completedContracts = allContracts.filter(c => c.status === '已完成');
-
-      // Calculate on-time completion rate
-      const onTimeCompletions = completedContracts.filter(contract => {
-        // Assuming we have a completion date field or use updatedAt for completed contracts
-        const actualEndDate = new Date(contract.updatedAt);
-        const plannedEndDate = new Date(contract.endDate);
-        return actualEndDate <= plannedEndDate;
-      });
-      
-      const onTimeCompletionRate = completedContracts.length > 0 
-        ? (onTimeCompletions.length / completedContracts.length) * 100 
-        : 0;
-
-      // Calculate average contract duration
-      const totalDuration = allContracts.reduce((sum, contract) => {
-        return sum + this.getContractDurationInMonths(contract);
-      }, 0);
-      
-      const averageContractDuration = allContracts.length > 0 
-        ? totalDuration / allContracts.length 
-        : 0;
-
-      // Calculate change order impact
-      const totalChangeOrderImpact = allContracts.reduce((sum, contract) => {
-        if (!contract.changeOrders) return sum;
-        
-        const approvedChangeOrders = contract.changeOrders.filter(co => co.status === '已核准');
-        return sum + approvedChangeOrders.reduce((coSum, co) => coSum + co.impact.cost, 0);
-      }, 0);
-
-      // Calculate average change orders per contract
-      const totalChangeOrders = allContracts.reduce((sum, contract) => {
-        return sum + (contract.changeOrders?.length || 0);
-      }, 0);
-      
-      const averageChangeOrdersPerContract = allContracts.length > 0 
-        ? totalChangeOrders / allContracts.length 
-        : 0;
-
-      return {
-        onTimeCompletionRate,
-        averageContractDuration,
-        totalChangeOrderImpact,
-        averageChangeOrdersPerContract,
-      };
-    } catch (error) {
-      console.error('Error calculating performance metrics:', error);
-      throw new Error(`Failed to calculate performance metrics: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Get revenue trends over time
-   */
-  async getRevenueTrends(months: number = 12): Promise<Array<{
-    month: string;
-    revenue: number;
-    contractCount: number;
-  }>> {
-    try {
-      const allContracts = await this.contractRepository.findAll();
-      const trends: Array<{ month: string; revenue: number; contractCount: number }> = [];
-      
-      const currentDate = new Date();
-      
-      for (let i = months - 1; i >= 0; i--) {
-        const targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-        const targetMonth = targetDate.getMonth();
-        const targetYear = targetDate.getFullYear();
-        
-        // Filter contracts active in this month
-        const activeContractsInMonth = allContracts.filter(contract => {
-          const startDate = new Date(contract.startDate);
-          const endDate = new Date(contract.endDate);
-          
-          const contractStartsBeforeOrDuringMonth = 
-            startDate.getFullYear() < targetYear || 
-            (startDate.getFullYear() === targetYear && startDate.getMonth() <= targetMonth);
-          
-          const contractEndsAfterOrDuringMonth = 
-            endDate.getFullYear() > targetYear || 
-            (endDate.getFullYear() === targetYear && endDate.getMonth() >= targetMonth);
-
-          return contractStartsBeforeOrDuringMonth && contractEndsAfterOrDuringMonth;
-        });
-
-        // Calculate revenue for this month
-        const monthlyRevenue = activeContractsInMonth.reduce((total, contract) => {
-          const contractValue = this.calculateContractValue(contract);
-          const contractDurationMonths = this.getContractDurationInMonths(contract);
-          const monthlyValue = contractDurationMonths > 0 ? contractValue / contractDurationMonths : contractValue;
-          
-          return total + monthlyValue;
-        }, 0);
-
-        trends.push({
-          month: targetDate.toLocaleDateString('zh-TW', { year: 'numeric', month: 'short' }),
-          revenue: monthlyRevenue,
-          contractCount: activeContractsInMonth.length,
-        });
+      if (value < 100000) {
+        ranges['Under 100K']++;
+      } else if (value < 500000) {
+        ranges['100K - 500K']++;
+      } else if (value < 1000000) {
+        ranges['500K - 1M']++;
+      } else if (value < 5000000) {
+        ranges['1M - 5M']++;
+      } else {
+        ranges['Over 5M']++;
       }
+    });
+
+    return ranges;
+  }
+
+  /**
+   * Calculate average contract duration
+   */
+  calculateAverageContractDuration(contracts: Contract[]): number {
+    if (contracts.length === 0) return 0;
+
+    const totalDays = contracts.reduce((sum, contract) => {
+      const startDate = contract.startDate instanceof Date ? contract.startDate : new Date(contract.startDate);
+      const endDate = contract.endDate instanceof Date ? contract.endDate : new Date(contract.endDate);
       
-      return trends;
-    } catch (error) {
-      console.error('Error calculating revenue trends:', error);
-      throw new Error(`Failed to calculate revenue trends: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+      const durationMs = endDate.getTime() - startDate.getTime();
+      const durationDays = Math.ceil(durationMs / (1000 * 60 * 60 * 24));
+      
+      return sum + durationDays;
+    }, 0);
+
+    return Math.round(totalDays / contracts.length);
+  }
+
+  /**
+   * Get contracts expiring in the next N days
+   */
+  getExpiringContracts(contracts: Contract[], daysAhead: number = 30): Contract[] {
+    const now = new Date();
+    const futureDate = new Date();
+    futureDate.setDate(now.getDate() + daysAhead);
+
+    return contracts.filter(contract => {
+      if (contract.status !== '啟用中') return false;
+      
+      const endDate = contract.endDate instanceof Date ? contract.endDate : new Date(contract.endDate);
+      return endDate >= now && endDate <= futureDate;
+    }).sort((a, b) => {
+      const dateA = a.endDate instanceof Date ? a.endDate : new Date(a.endDate);
+      const dateB = b.endDate instanceof Date ? b.endDate : new Date(b.endDate);
+      return dateA.getTime() - dateB.getTime();
+    });
+  }
+
+  /**
+   * Calculate payment completion rate
+   */
+  calculatePaymentCompletionRate(contract: Contract): number {
+    if (!contract.payments || contract.payments.length === 0) return 0;
+
+    const totalPayments = contract.payments.length;
+    const completedPayments = contract.payments.filter(payment => payment.paidDate).length;
+
+    return Math.round((completedPayments / totalPayments) * 100);
   }
 
   /**
    * Get top clients by contract value
    */
-  async getTopClientsByValue(limit: number = 10): Promise<Array<{
-    client: string;
-    totalValue: number;
-    contractCount: number;
-  }>> {
-    try {
-      const allContracts = await this.contractRepository.findAll();
-      
-      // Group contracts by client
-      const clientStats = new Map<string, { totalValue: number; contractCount: number }>();
-      
-      allContracts.forEach(contract => {
-        const client = contract.client;
-        const contractValue = this.calculateContractValue(contract);
-        
-        if (clientStats.has(client)) {
-          const existing = clientStats.get(client)!;
-          clientStats.set(client, {
-            totalValue: existing.totalValue + contractValue,
-            contractCount: existing.contractCount + 1,
-          });
-        } else {
-          clientStats.set(client, {
-            totalValue: contractValue,
-            contractCount: 1,
-          });
-        }
-      });
+  getTopClientsByValue(contracts: Contract[], limit: number = 5): Array<{ client: string; totalValue: number; contractCount: number }> {
+    const clientStats: Record<string, { totalValue: number; contractCount: number }> = {};
 
-      // Convert to array and sort by total value
-      return Array.from(clientStats.entries())
-        .map(([client, stats]) => ({
-          client,
-          totalValue: stats.totalValue,
-          contractCount: stats.contractCount,
-        }))
-        .sort((a, b) => b.totalValue - a.totalValue)
-        .slice(0, limit);
-    } catch (error) {
-      console.error('Error getting top clients:', error);
-      throw new Error(`Failed to get top clients: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    contracts.forEach(contract => {
+      const value = this.calculateContractValue(contract);
+      
+      if (!clientStats[contract.client]) {
+        clientStats[contract.client] = { totalValue: 0, contractCount: 0 };
+      }
+      
+      clientStats[contract.client].totalValue += value;
+      clientStats[contract.client].contractCount++;
+    });
+
+    return Object.entries(clientStats)
+      .map(([client, stats]) => ({ client, ...stats }))
+      .sort((a, b) => b.totalValue - a.totalValue)
+      .slice(0, limit);
+  }
+
+  /**
+   * Calculate year-over-year growth
+   */
+  calculateYearOverYearGrowth(contracts: Contract[]): number {
+    const currentYear = new Date().getFullYear();
+    const previousYear = currentYear - 1;
+
+    const currentYearValue = contracts
+      .filter(contract => {
+        const startDate = contract.startDate instanceof Date ? contract.startDate : new Date(contract.startDate);
+        return startDate.getFullYear() === currentYear;
+      })
+      .reduce((sum, contract) => sum + this.calculateContractValue(contract), 0);
+
+    const previousYearValue = contracts
+      .filter(contract => {
+        const startDate = contract.startDate instanceof Date ? contract.startDate : new Date(contract.startDate);
+        return startDate.getFullYear() === previousYear;
+      })
+      .reduce((sum, contract) => sum + this.calculateContractValue(contract), 0);
+
+    if (previousYearValue === 0) return currentYearValue > 0 ? 100 : 0;
+
+    return Math.round(((currentYearValue - previousYearValue) / previousYearValue) * 100);
   }
 }
 
