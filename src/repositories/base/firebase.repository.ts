@@ -472,7 +472,7 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID extends string
       }
     });
 
-    return entityData;
+    return entityData as Partial<T>;
   }
 }
 
