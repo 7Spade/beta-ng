@@ -12,6 +12,7 @@
 │          workflow-optimization-flow.ts
 │
 ├─app
+│  │  favicon.ico
 │  │  globals.css
 │  │  layout.tsx
 │  │  page.tsx
@@ -35,6 +36,9 @@
 │  │  │
 │  │  ├─partnerverse
 │  │  │  │  page.tsx
+│  │  │  │
+│  │  │  ├─dashboard
+│  │  │  │      page.tsx
 │  │  │  │
 │  │  │  ├─partners
 │  │  │  │      page.tsx
@@ -86,7 +90,6 @@
 │  │  ├─app
 │  │  │  │  ai-subtask-suggestions.tsx
 │  │  │  │  create-project-dialog.tsx
-│  │  │  │  project-detail-client.tsx
 │  │  │  │  project-progress-chart.tsx
 │  │  │  │  README.md
 │  │  │  │  task-item.tsx
@@ -120,8 +123,10 @@
 │  │  │      work-items-table.tsx
 │  │  │
 │  │  ├─partnerverse
-│  │  │  │  partner-dashboard.tsx
 │  │  │  │  README.md
+│  │  │  │
+│  │  │  ├─dashboard
+│  │  │  │      partner-dashboard.tsx
 │  │  │  │
 │  │  │  ├─partners
 │  │  │  │  │  partner-list.tsx
@@ -168,16 +173,37 @@
 │  │  │      app-header.tsx
 │  │  │      app-provider.tsx
 │  │  │      app-shell.tsx
+│  │  │      layout-wrapper.tsx
 │  │  │      theme-provider.tsx
 │  │  │
 │  │  ├─navigation
 │  │  │      breadcrumb.tsx
+│  │  │      context-menu.tsx
 │  │  │      navigation-menu-item.tsx
 │  │  │      navigation-menu.tsx
+│  │  │      notification-center.tsx
+│  │  │      quick-actions.tsx
+│  │  │      search-command.tsx
 │  │  │      unified-sidebar.tsx
+│  │  │      user-menu.tsx
+│  │  │
+│  │  ├─overlays
+│  │  │      drawer-container.tsx
+│  │  │      modal-container.tsx
+│  │  │      popover-container.tsx
+│  │  │      tooltip-provider.tsx
+│  │  │
+│  │  ├─responsive
+│  │  │      mobile-menu.tsx
+│  │  │      responsive-wrapper.tsx
 │  │  │
 │  │  └─shared
+│  │          empty-state.tsx
 │  │          logo.tsx
+│  │          page-container.tsx
+│  │          page-header.tsx
+│  │          section-divider.tsx
+│  │          status-indicator.tsx
 │  │
 │  └─ui
 │          accordion.tsx
@@ -193,6 +219,7 @@
 │          chart.tsx
 │          checkbox.tsx
 │          collapsible.tsx
+│          context-menu.tsx
 │          dialog.tsx
 │          dropdown-menu.tsx
 │          form.tsx
@@ -226,14 +253,8 @@
 │      README.md
 │
 ├─docs
-│      architecture.md
-│      CODING_GUIDELINES.md
 │      database.md
-│      deployment.md
-│      features.md
-│      nextjs-principles.md
 │      README.md
-│      requirements.md
 │      structure.md
 │
 ├─hooks
