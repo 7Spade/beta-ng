@@ -107,7 +107,7 @@ describe('Contract Functionality Tests', () => {
         });
 
         it('should create new contract successfully', async () => {
-            const newContractData: CreateContractDto = {
+            const newContractData: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'> = {
                 name: 'New Contract',
                 contractor: 'New Contractor',
                 client: 'New Client',
@@ -115,6 +115,10 @@ describe('Contract Functionality Tests', () => {
                 endDate: new Date('2024-12-31'),
                 totalValue: 150000,
                 scope: 'New project scope',
+                status: '啟用中',
+                payments: [],
+                changeOrders: [],
+                versions: [],
             };
 
             const createdContract = await contractRepository.create(newContractData);
@@ -307,7 +311,7 @@ describe('Contract Functionality Tests', () => {
     describe('Data Consistency and Integrity', () => {
         it('should maintain data consistency across operations', async () => {
             // Test that create, read, update operations maintain consistency
-            const createData: CreateContractDto = {
+            const createData: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'> = {
                 name: 'Consistency Test Contract',
                 contractor: 'Test Contractor',
                 client: 'Test Client',
@@ -315,6 +319,10 @@ describe('Contract Functionality Tests', () => {
                 endDate: new Date('2024-12-31'),
                 totalValue: 100000,
                 scope: 'Test scope',
+                status: '啟用中',
+                payments: [],
+                changeOrders: [],
+                versions: [],
             };
 
             // Create
