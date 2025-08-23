@@ -342,15 +342,16 @@ describe('Contract Functionality Tests', () => {
         it('should validate business rules consistently', () => {
             const contract: Contract = {
                 ...mockContract,
-                startDate: new Date('2024-01-01'),
-                endDate: new Date('2024-12-31'),
+                startDate: new Date('2025-01-01'),
+                endDate: new Date('2025-12-31'),
                 totalValue: 100000,
+                status: '啟用中',
                 payments: [
                     {
                         id: 'payment-1',
                         amount: 50000,
                         status: 'pending' as any,
-                        requestDate: new Date('2024-06-01'),
+                        requestDate: new Date('2025-06-01'),
                     },
                 ],
             };
