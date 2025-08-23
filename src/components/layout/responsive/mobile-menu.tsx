@@ -10,7 +10,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import { UnifiedSidebar } from './unified-sidebar'
+import { UnifiedSidebar } from '../navigation/unified-sidebar'
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false)
