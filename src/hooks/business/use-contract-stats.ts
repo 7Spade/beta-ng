@@ -9,7 +9,7 @@ import { DashboardStats } from '../../types/services/contract.service.types';
 import { ContractStatsService } from '../../services/contracts/contract-stats.service';
 
 // Hook return types
-export interface UseContractStatsResult {
+export interface UseContractDashboardStatsResult {
   stats: DashboardStats | null;
   loading: boolean;
   error: Error | null;
@@ -52,7 +52,7 @@ export interface UseContractStatsOptions {
 /**
  * Hook for contract dashboard statistics
  */
-export function useContractStats(options: UseContractStatsOptions = {}): UseContractStatsResult {
+export function useContractDashboardStats(options: UseContractStatsOptions = {}): UseContractDashboardStatsResult {
   const { autoFetch = true, refreshInterval, cacheKey } = options;
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(false);
@@ -271,7 +271,7 @@ export function useMonthlyRevenue(contracts?: Contract[]): UseMonthlyRevenueResu
 /**
  * Hook for real-time contract statistics with subscription
  */
-export function useContractStatsSubscription(): UseContractStatsResult {
+export function useContractStatsSubscription(): UseContractDashboardStatsResult {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
