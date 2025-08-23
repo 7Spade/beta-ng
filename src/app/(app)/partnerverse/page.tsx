@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, type FC } from 'react';
@@ -5,7 +6,7 @@ import type { Partner } from '@/lib/types';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dashboard } from '@/components/features/partnerverse/dashboard/dashboard';
+import { PartnerDashboard } from '@/components/features/partnerverse/partner-dashboard';
 import { useRouter } from 'next/navigation';
 
 const PartnerVersePage: FC = () => {
@@ -48,7 +49,7 @@ const PartnerVersePage: FC = () => {
       );
   }
 
-  return <Dashboard partners={partners} onViewPartners={handleNavigate} />;
+  return <PartnerDashboard partners={partners} onViewPartners={handleNavigate} />;
 }
 
 export default PartnerVersePage;
