@@ -1,0 +1,17 @@
+{
+  "packageManager": "pnpm",
+  "commands": {
+    "install": "pnpm install",
+    "run": "pnpm run",
+    "test": "pnpm test",
+    "build": "pnpm build",
+    "dev": "pnpm dev",
+    "lint": "pnpm lint",
+    "typecheck": "pnpm typecheck"
+  },
+  "preferences": {
+    "useYarn": false,
+    "useNpm": false,
+    "usePnpm": true
+  }
+}

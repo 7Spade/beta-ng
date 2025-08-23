@@ -16,6 +16,7 @@ export interface UseContractsResult {
   loading: boolean;
   error: EnhancedError | null;
   userMessage: string | null;
+  hasError: boolean;
   refetch: () => Promise<void>;
   refresh: () => Promise<void>;
   clearError: () => void;
@@ -32,6 +33,7 @@ export interface UseContractResult {
   loading: boolean;
   error: EnhancedError | null;
   userMessage: string | null;
+  hasError: boolean;
   refetch: () => Promise<void>;
   clearError: () => void;
 }
@@ -41,6 +43,7 @@ export interface UseContractStatsResult {
   loading: boolean;
   error: EnhancedError | null;
   userMessage: string | null;
+  hasError: boolean;
   refetch: () => Promise<void>;
   clearError: () => void;
 }
@@ -50,6 +53,7 @@ export interface UseContractSubscriptionResult {
   loading: boolean;
   error: EnhancedError | null;
   userMessage: string | null;
+  hasError: boolean;
   unsubscribe: () => void;
   clearError: () => void;
 }
@@ -149,6 +153,7 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRes
     loading,
     error,
     userMessage,
+    hasError: !!error,
     refetch: fetchContracts,
     refresh,
     clearError,
@@ -256,6 +261,7 @@ export function useContractsWithFilters(options: UseContractsOptions = {}): UseC
     loading,
     error,
     userMessage: error ? errorService.formatErrorMessage(error) : null,
+    hasError: !!error,
     hasMore,
     refetch: () => fetchContracts(false),
     refresh,
@@ -359,6 +365,7 @@ export function useContract(id: string | null, options: { autoFetch?: boolean } 
     loading,
     error,
     userMessage,
+    hasError: !!error,
     refetch: fetchContract,
     clearError,
   };
@@ -430,6 +437,7 @@ export function useContractStats(options: { autoFetch?: boolean; cacheKey?: stri
     loading,
     error,
     userMessage,
+    hasError: !!error,
     refetch: fetchStats,
     clearError,
   };
@@ -508,6 +516,7 @@ export function useContractSubscription(options: UseContractSubscriptionOptions 
     loading,
     error,
     userMessage,
+    hasError: !!error,
     unsubscribe,
     clearError,
   };
@@ -560,6 +569,7 @@ export function useExpiringContracts(daysAhead: number = 30): UseContractsResult
     loading,
     error,
     userMessage,
+    hasError: !!error,
     refetch: fetchExpiringContracts,
     refresh: fetchExpiringContracts,
     clearError,
