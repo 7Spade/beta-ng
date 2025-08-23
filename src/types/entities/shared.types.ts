@@ -1,26 +1,24 @@
 /**
- * 基礎實體介面
- * 所有實體都應該繼承此介面
+ * Shared entity types and base interfaces
  */
+
 export interface BaseEntity {
   id: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-/**
- * 通用狀態型別
- */
-export type EntityStatus = '啟用中' | '停用中' | '待審核';
+// Common status types
+export type EntityStatus = 'active' | 'inactive' | 'pending' | 'archived';
 
-/**
- * 通用任務狀態型別
- */
-export type TaskStatus = '待處理' | '進行中' | '已完成';
+// Common pagination types
+export interface PaginationOptions {
+  page: number;
+  limit: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
 
-/**
- * 通用分頁參數
- */
 export interface PaginationParams {
   page: number;
   limit: number;
@@ -28,9 +26,14 @@ export interface PaginationParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-/**
- * 通用分頁回應
- */
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
@@ -39,66 +42,39 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-/**
- * 通用查詢參數
- */
+// Query parameters
 export interface QueryParams {
-  search?: string;
   filters?: Record<string, any>;
-  pagination?: PaginationParams;
+  pagination?: PaginationOptions;
+  where?: Array<{
+    field: string;
+    operator: '==' | '!=' | '<' | '<=' | '>' | '>=' | 'in' | 'not-in' | 'array-contains' | 'array-contains-any';
+    value: any;
+  }>;
+  orderBy?: Array<{
+    field: string;
+    direction: 'asc' | 'desc';
+  }>;
+  limit?: number;
+  offset?: number;
 }
 
-/**
- * 通用 API 回應
- */
-export interface ApiResponse<T = any> {
+// Common query result types
+export interface QueryResult<T> {
+  data: T[];
+  count: number;
+}
+
+// Common error types
+export interface ValidationError {
+  field: string;
+  message: string;
+  code: string;
+}
+
+export interface OperationResult<T = void> {
   success: boolean;
   data?: T;
   error?: string;
-  message?: string;
-}
-
-/**
- * 通用錯誤型別
- */
-export interface AppError {
-  code: string;
-  message: string;
-  details?: any;
-  timestamp: Date;
-}
-
-/**
- * 驗證錯誤
- */
-export interface ValidationError extends AppError {
-  code: 'VALIDATION_ERROR';
-  field: string;
-  value: any;
-}
-
-/**
- * 找不到資源錯誤
- */
-export interface NotFoundError extends AppError {
-  code: 'NOT_FOUND';
-  resource: string;
-  id: string;
-}
-
-/**
- * 通用載入狀態
- */
-export interface LoadingState {
-  loading: boolean;
-  error: Error | null;
-}
-
-/**
- * 通用操作結果
- */
-export interface OperationResult<T = any> {
-  success: boolean;
-  data?: T;
-  error?: AppError;
+  validationErrors?: ValidationError[];
 }

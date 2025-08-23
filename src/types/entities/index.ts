@@ -1,5 +1,7 @@
-// Entity type exports
+/**
+ * Entity Types Module Exports
+ */
+
 export * from './shared.types';
 export * from './contract.types';
-export * from './project.types';
-export * from './partner.types';
+// Additional entity types will be exported here as they are created
