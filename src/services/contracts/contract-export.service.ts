@@ -102,7 +102,7 @@ export class ContractExportService {
     let filteredContracts = [...contracts];
 
     if (statusFilter && statusFilter.length > 0) {
-      filteredContracts = filteredContracts.filter(contract => 
+      filteredContracts = filteredContracts.filter(contract =>
         statusFilter.includes(contract.status)
       );
     }
@@ -116,7 +116,7 @@ export class ContractExportService {
     }
 
     const columns = this.getDefaultColumns();
-    
+
     ExportService.exportToCSV(filteredContracts, columns, {
       filename,
       ...exportOptions
@@ -364,7 +364,7 @@ export class ContractExportService {
 
     const totalDuration = end.getTime() - start.getTime();
     const elapsed = now.getTime() - start.getTime();
-    
+
     return Math.round((elapsed / totalDuration) * 100);
   }
 }
