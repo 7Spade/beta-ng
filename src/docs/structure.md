@@ -4,12 +4,12 @@
 │  │  README.md
 │  │
 │  └─flows
-│          extract-work-items.ts
+│          extract-work-items-flow.ts
 │          generate-knowledge-entry-flow.ts
 │          generate-skill-flow.ts
 │          generate-subtasks-flow.ts
-│          summarize-contract.ts
-│          workflow-optimization.ts
+│          summarize-contract-flow.ts
+│          workflow-optimization-flow.ts
 │
 ├─app
 │  │  favicon.ico
@@ -20,6 +20,7 @@
 │  │
 │  ├─(app)
 │  │  │  layout.tsx
+│  │  │  README.md
 │  │  │
 │  │  ├─analytics
 │  │  │      page.tsx
@@ -54,6 +55,9 @@
 │  │  │  └─[id]
 │  │  │          page.tsx
 │  │  │
+│  │  ├─settings
+│  │  │      page.tsx
+│  │  │
 │  │  └─team
 │  │      ├─knowledge-base
 │  │      │      page.tsx
@@ -71,41 +75,81 @@
 │          contracts.actions.ts
 │          documents.actions.ts
 │          knowledge.actions.ts
+│          README.md
 │
 ├─components
 │  │  README.md
 │  │
-│  ├─analytics
-│  │  └─dashboard
-│  │          dashboard.tsx
-│  │          README.md
-│  │
-│  ├─app
-│  │  │  ai-subtask-suggestions.tsx
-│  │  │  create-project-dialog.tsx
-│  │  │  project-progress-chart.tsx
-│  │  │  task-item.tsx
+│  ├─features
+│  │  ├─analytics
+│  │  │  │  README.md
+│  │  │  │
+│  │  │  └─dashboard
+│  │  │          dashboard.tsx
 │  │  │
-│  │  └─dashboard
-│  │          dashboard.tsx
-│  │
-│  ├─contracts
-│  │  │  ai-summarizer-dialog.tsx
-│  │  │  contracts-details-sheet.tsx
-│  │  │  contracts-table.tsx
-│  │  │  create-contract-dialog.tsx
-│  │  │  dashboard-stats.tsx
-│  │  │  README.md
+│  │  ├─app
+│  │  │  │  ai-subtask-suggestions.tsx
+│  │  │  │  create-project-dialog.tsx
+│  │  │  │  project-progress-chart.tsx
+│  │  │  │  README.md
+│  │  │  │  task-item.tsx
+│  │  │  │
+│  │  │  └─dashboard
+│  │  │          dashboard.tsx
 │  │  │
-│  │  └─dashboard
-│  │          dashboard.tsx
-│  │
-│  ├─dashboard
-│  │      ai-usage-log.tsx
-│  │
-│  ├─documents
-│  │      README.md
-│  │      work-items-table.tsx
+│  │  ├─contracts
+│  │  │  │  ai-summarizer-dialog.tsx
+│  │  │  │  contracts-details-sheet.tsx
+│  │  │  │  contracts-table.tsx
+│  │  │  │  create-contract-dialog.tsx
+│  │  │  │  dashboard-stats.tsx
+│  │  │  │  README.md
+│  │  │  │
+│  │  │  └─dashboard
+│  │  │          dashboard.tsx
+│  │  │
+│  │  ├─dashboard
+│  │  │      ai-usage-log.tsx
+│  │  │      README.md
+│  │  │
+│  │  ├─documents
+│  │  │      README.md
+│  │  │      work-items-table.tsx
+│  │  │
+│  │  ├─partnerverse
+│  │  │  │  README.md
+│  │  │  │
+│  │  │  ├─dashboard
+│  │  │  │      dashboard.tsx
+│  │  │  │
+│  │  │  ├─partners
+│  │  │  │  │  partner-list.tsx
+│  │  │  │  │  partner-profile.tsx
+│  │  │  │  │
+│  │  │  │  └─forms
+│  │  │  │          contact-form.tsx
+│  │  │  │          partner-form.tsx
+│  │  │  │
+│  │  │  └─workflows
+│  │  │          optimization-assistant.tsx
+│  │  │          receivable-payable.tsx
+│  │  │          workflow-builder.tsx
+│  │  │
+│  │  └─team
+│  │      ├─knowledge-base
+│  │      │      entry-form-dialog.tsx
+│  │      │
+│  │      ├─members
+│  │      │      create-member-dialog.tsx
+│  │      │      README.md
+│  │      │
+│  │      ├─schedule
+│  │      │      README.md
+│  │      │
+│  │      └─skills
+│  │              README.md
+│  │              skill-form-dialog.tsx
+│  │              skills-list.tsx
 │  │
 │  ├─layout
 │  │  │  README.md
@@ -114,6 +158,7 @@
 │  │  │      app-header.tsx
 │  │  │      app-provider.tsx
 │  │  │      app-shell.tsx
+│  │  │      theme-provider.tsx
 │  │  │
 │  │  ├─navigation
 │  │  │      breadcrumb.tsx
@@ -124,39 +169,6 @@
 │  │  │
 │  │  └─shared
 │  │          logo.tsx
-│  │
-│  ├─partnerverse
-│  │  ├─dashboard
-│  │  │      dashboard.tsx
-│  │  │
-│  │  ├─partners
-│  │  │  │  partner-list.tsx
-│  │  │  │  partner-profile.tsx
-│  │  │  │
-│  │  │  └─forms
-│  │  │          contact-form.tsx
-│  │  │          partner-form.tsx
-│  │  │
-│  │  └─workflows
-│  │          optimization-assistant.tsx
-│  │          receivable-payable.tsx
-│  │          workflow-builder.tsx
-│  │
-│  ├─team
-│  │  ├─knowledge-base
-│  │  │      entry-form-dialog.tsx
-│  │  │
-│  │  ├─members
-│  │  │      create-member-dialog.tsx
-│  │  │      README.md
-│  │  │
-│  │  ├─schedule
-│  │  │      README.md
-│  │  │
-│  │  └─skills
-│  │          README.md
-│  │          skill-form-dialog.tsx
-│  │          skills-list.tsx
 │  │
 │  └─ui
 │          accordion.tsx
@@ -207,6 +219,7 @@
 ├─docs
 │      database.md
 │      README.md
+│      structure.md
 │
 ├─hooks
 │      README.md
@@ -222,3 +235,4 @@
 │
 └─services
         logging.service.ts
+        README.md
