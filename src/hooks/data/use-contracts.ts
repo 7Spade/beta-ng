@@ -163,7 +163,7 @@ export function useContractsWithFilters(options: UseContractsOptions = {}): UseC
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<EnhancedError | null>(null);
   const [hasMore, setHasMore] = useState(false);
 
   const contractRepository = useRef(new ContractRepository()).current;

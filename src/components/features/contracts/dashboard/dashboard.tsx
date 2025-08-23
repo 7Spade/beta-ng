@@ -9,62 +9,75 @@
  * 
  * @fileoverview 合約儀表板元件
  * @description 顯示合約相關統計數據，包括總數、進行中、已完成以及總價值。
+ * 重構後的純 UI 元件，使用自訂 hooks 進行資料獲取和業務邏輯處理。
  */
 'use client';
 
-import { useState, useEffect } from 'react';
-import type { Contract } from '@/lib/types';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { useContractDashboardStats } from '@/hooks/business/use-contract-stats';
 import { DashboardStats } from '../dashboard-stats';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 export function ContractDashboard() {
-  const [contracts, setContracts] = useState<Contract[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchContracts = async () => {
-      try {
-        const contractsCollection = collection(db, 'contracts');
-        const contractSnapshot = await getDocs(contractsCollection);
-        const contractList = contractSnapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                ...data,
-                id: doc.id,
-                startDate: data.startDate?.toDate(),
-                endDate: data.endDate?.toDate(),
-            } as Contract;
-        });
-        setContracts(contractList);
-      } catch (error) {
-        console.error("為儀表板獲取合約時發生錯誤：", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchContracts();
-  }, []);
+  const { stats, loading, error, userMessage, refetch, clearError } = useContractDashboardStats({
+    autoFetch: true,
+    refreshInterval: 5 * 60 * 1000, // Refresh every 5 minutes
+  });
 
   if (loading) {
     return (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Skeleton className="h-28" />
-            <Skeleton className="h-28" />
-            <Skeleton className="h-28" />
-            <Skeleton className="h-28" />
-        </div>
-    )
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Skeleton className="h-28" />
+        <Skeleton className="h-28" />
+        <Skeleton className="h-28" />
+        <Skeleton className="h-28" />
+      </div>
+    );
   }
 
-  const stats = {
-    totalContracts: contracts.length,
-    active: contracts.filter(c => c.status === '啟用中').length,
-    completed: contracts.filter(c => c.status === '已完成').length,
-    totalValue: contracts.reduce((acc, c) => acc + c.totalValue, 0),
+  if (error && userMessage) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription className="flex items-center justify-between">
+          <span>{userMessage}</span>
+          <div className="flex gap-2">
+            <button
+              onClick={clearError}
+              className="text-sm underline hover:no-underline"
+            >
+              關閉
+            </button>
+            <button
+              onClick={refetch}
+              className="text-sm underline hover:no-underline"
+            >
+              重試
+            </button>
+          </div>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="text-center text-muted-foreground">
+          無法載入儀表板統計資料
+        </div>
+      </div>
+    );
+  }
+
+  // Transform DashboardStats to match the DashboardStats component interface
+  const transformedStats = {
+    totalContracts: stats.totalContracts,
+    active: stats.activeContracts,
+    completed: stats.completedContracts,
+    totalValue: stats.totalValue,
   };
 
-  return <DashboardStats stats={stats} />;
+  return <DashboardStats stats={transformedStats} />;
 }

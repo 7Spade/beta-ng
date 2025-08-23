@@ -300,7 +300,7 @@ export function useMonthlyRevenue(contracts?: Contract[]): UseMonthlyRevenueResu
 export function useContractStatsSubscription(): UseContractDashboardStatsResult {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<EnhancedError | null>(null);
   
   const contractStatsService = useRef(new ContractStatsService()).current;
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -312,10 +312,10 @@ export function useContractStatsSubscription(): UseContractDashboardStatsResult 
       setStats(result);
       setLoading(false);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to fetch contract statistics');
-      setError(error);
+      const enhancedError = errorService.handleError(err as Error);
+      setError(enhancedError);
       setLoading(false);
-      console.error('Error fetching contract stats:', error);
+      console.error('Error fetching contract stats:', enhancedError);
     }
   }, [contractStatsService]);
 
