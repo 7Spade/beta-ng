@@ -3,8 +3,8 @@
  * Handles contract-specific export functionality
  */
 
-import { Contract, ContractStatus } from '@/types/entities/contract.types';
-import { ExportService, ExportColumn, ExportOptions } from '@/services/shared/export.service';
+import { Contract, ContractStatus } from '../../types/entities/contract.types';
+import { ExportService, ExportColumn, ExportOptions } from '../shared/export.service';
 
 export interface ContractExportOptions extends ExportOptions {
   includePayments?: boolean;
