@@ -5,7 +5,7 @@ import type { Partner } from '@/lib/types';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dashboard } from '@/components/features/partnerverse/dashboard/dashboard';
+import { PartnerDashboard } from '@/components/features/partnerverse/dashboard/partner-dashboard';
 
 const PartnerVerseDashboardPage: FC = () => {
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -47,7 +47,7 @@ const PartnerVerseDashboardPage: FC = () => {
       );
   }
 
-  return <Dashboard partners={partners} onViewPartners={handleNavigate} />;
+  return <PartnerDashboard partners={partners} onViewPartners={handleNavigate} />;
 }
 
 export default PartnerVerseDashboardPage;
