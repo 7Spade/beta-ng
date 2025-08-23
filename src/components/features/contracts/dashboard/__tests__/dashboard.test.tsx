@@ -3,10 +3,11 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { ContractDashboard } from '../dashboard';
 import { useContractDashboardStats } from '@/hooks/business/use-contract-stats';
 import { DashboardStats } from '@/types/services/contract.service.types';
+import { EnhancedError, ErrorSeverity, ErrorCategory } from '@/types/entities/error.types';
 
 // Mock the hook
 jest.mock('@/hooks/business/use-contract-stats');
@@ -67,6 +68,16 @@ describe('ContractDashboard', () => {
     recentContracts: [],
   };
 
+  // Helper function to create proper EnhancedError objects
+  const createMockError = (code: string = 'FETCH_ERROR', message: string = 'Failed to fetch data'): EnhancedError => ({
+    code,
+    message,
+    timestamp: new Date(),
+    severity: ErrorSeverity.MEDIUM,
+    category: ErrorCategory.NETWORK,
+    name: 'FetchError',
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -99,11 +110,7 @@ describe('ContractDashboard', () => {
       mockUseContractDashboardStats.mockReturnValue({
         stats: null,
         loading: false,
-        error: {
-          code: 'FETCH_ERROR',
-          message: 'Failed to fetch data',
-          timestamp: new Date(),
-        },
+        error: createMockError(),
         userMessage: '無法載入儀表板資料，請稍後再試',
         refetch: mockRefetch,
         refresh: jest.fn(),
@@ -125,11 +132,7 @@ describe('ContractDashboard', () => {
       mockUseContractDashboardStats.mockReturnValue({
         stats: null,
         loading: false,
-        error: {
-          code: 'FETCH_ERROR',
-          message: 'Failed to fetch data',
-          timestamp: new Date(),
-        },
+        error: createMockError(),
         userMessage: '無法載入儀表板資料，請稍後再試',
         refetch: jest.fn(),
         refresh: jest.fn(),
@@ -150,11 +153,7 @@ describe('ContractDashboard', () => {
       mockUseContractDashboardStats.mockReturnValue({
         stats: null,
         loading: false,
-        error: {
-          code: 'FETCH_ERROR',
-          message: 'Failed to fetch data',
-          timestamp: new Date(),
-        },
+        error: createMockError(),
         userMessage: '無法載入儀表板資料，請稍後再試',
         refetch: mockRefetch,
         refresh: jest.fn(),
@@ -317,11 +316,7 @@ describe('ContractDashboard', () => {
       mockUseContractDashboardStats.mockReturnValue({
         stats: null,
         loading: false,
-        error: {
-          code: 'FETCH_ERROR',
-          message: 'Failed to fetch data',
-          timestamp: new Date(),
-        },
+        error: createMockError(),
         userMessage: null, // No user message
         refetch: jest.fn(),
         refresh: jest.fn(),

@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, addDoc, Timestamp, query } from 'firebase/firestore';
-import type { Contract } from '@/lib/types';
+import type { Contract } from '@/types/entities/contract.types';
 import { ContractsTable } from '@/components/features/contracts/contracts-table';
 import { AiSummarizerDialog } from '@/components/features/contracts/ai-summarizer-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,6 +24,8 @@ const processFirestoreContract = (doc: any): Contract => {
     id: doc.id,
     startDate: data.startDate?.toDate(),
     endDate: data.endDate?.toDate(),
+    createdAt: data.createdAt?.toDate() || new Date(),
+    updatedAt: data.updatedAt?.toDate() || new Date(),
     payments: data.payments?.map((p: any) => ({
       ...p,
       requestDate: p.requestDate?.toDate(),
@@ -62,12 +64,14 @@ export default function ContractsPage() {
     return () => unsubscribe();
   }, []);
 
-  const handleAddContract = async (data: Omit<Contract, 'id' | 'payments' | 'changeOrders' | 'versions'>) => {
+  const handleAddContract = async (data: Omit<Contract, 'id' | 'payments' | 'changeOrders' | 'versions' | 'createdAt' | 'updatedAt'>) => {
     try {
         const newContractData = {
             ...data,
             startDate: Timestamp.fromDate(data.startDate),
             endDate: Timestamp.fromDate(data.endDate),
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now(),
             payments: [],
             changeOrders: [],
             versions: [{

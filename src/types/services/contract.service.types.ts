@@ -33,6 +33,7 @@ export interface DashboardStats {
 // Export options interface
 export interface ExportOptions {
   format: 'csv' | 'excel' | 'pdf';
+  filename?: string;
   includePayments?: boolean;
   includeChangeOrders?: boolean;
   dateRange?: DateRange;
