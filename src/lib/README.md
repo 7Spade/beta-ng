@@ -1,10 +1,17 @@
 # Lib 目錄
 
-"lib" 是 "library" 的縮寫，此目錄通常用於存放應用程式的輔助程式碼、工具函數和設定。
+此目錄包含應用程式的核心庫文件，提供基礎功能和配置。
 
 ## 檔案
 
-- **`firebase.ts`**: 用於初始化 Firebase SDK，並匯出 Firebase 服務（如 Firestore）的實例。
-- **`utils.ts`**: 包含通用的工具函數。例如，`cn` 函數用於合併 Tailwind CSS 類名，`formatDate` 用於格式化日期。
-- **`types.ts`**: 存放整個應用程式共享的 TypeScript 類型定義。
-- **`roles.ts`**: 定義用戶角色和相關的權限檢查函數。
+- **`firebase.ts`** - Firebase 配置和初始化
+- **`types.ts`** - 核心類型定義
+- **`utils.ts`** - 通用工具函數
+- **`roles.ts`** - 角色和權限定義
+
+## 用途
+
+- 提供 Firebase 服務配置
+- 定義核心數據類型
+- 提供通用工具函數
+- 管理應用程式權限

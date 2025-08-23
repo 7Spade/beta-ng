@@ -6,17 +6,11 @@
 import { Contract, ContractStats, ContractFilters, DateRange } from '../entities/contract.types';
 import { CreateContractDto, UpdateContractDto } from '../dto';
 
-// Validation result interface
-export interface ValidationResult {
-  isValid: boolean;
-  errors: ValidationError[];
-}
+// Import validation types from utils to avoid conflicts
+import { ValidationResult, ValidationError } from '../../utils/validation/common.validation';
 
-export interface ValidationError {
-  field: string;
-  message: string;
-  code: string;
-}
+// Re-export validation types for service consumers
+export type { ValidationResult, ValidationError };
 
 // Dashboard statistics interface
 export interface DashboardStats {

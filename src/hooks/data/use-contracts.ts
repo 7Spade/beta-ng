@@ -203,9 +203,14 @@ export function useContractsWithFilters(options: UseContractsOptions = {}): UseC
       setTotal(result.total);
       setHasMore(result.contracts.length < result.total);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to fetch contracts');
-      setError(error);
-      console.error('Error fetching contracts with filters:', error);
+      const context: ErrorContext = {
+        component: 'useContractsWithFilters',
+        action: 'fetchContracts',
+        metadata: { filters, pagination, append }
+      };
+      const enhancedError = errorService.handleError(err as Error, context);
+      setError(enhancedError);
+      console.error('Error fetching contracts with filters:', enhancedError);
     } finally {
       setLoading(false);
     }
@@ -221,6 +226,7 @@ export function useContractsWithFilters(options: UseContractsOptions = {}): UseC
       // This is a simplified implementation
     } : undefined;
 
+    // TODO: Implement proper cursor-based pagination with nextPagination
     await fetchContracts(true);
   }, [fetchContracts, hasMore, loading, pagination]);
 
@@ -240,15 +246,21 @@ export function useContractsWithFilters(options: UseContractsOptions = {}): UseC
     }
   }, [autoFetch, fetchContracts]);
 
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
   return {
     contracts,
     total,
     loading,
     error,
+    userMessage: error ? errorService.formatErrorMessage(error) : null,
     hasMore,
     refetch: () => fetchContracts(false),
     refresh,
     loadMore,
+    clearError,
   };
 }
 
@@ -359,7 +371,8 @@ export function useContractStats(options: { autoFetch?: boolean; cacheKey?: stri
   const { autoFetch = true, cacheKey } = options;
   const [stats, setStats] = useState<ContractStats | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<EnhancedError | null>(null);
+  const [userMessage, setUserMessage] = useState<string | null>(null);
 
   const contractRepository = useRef(new ContractRepository()).current;
   const cache = useRef(new Map<string, { data: ContractStats; timestamp: number }>()).current;
@@ -387,9 +400,15 @@ export function useContractStats(options: { autoFetch?: boolean; cacheKey?: stri
       cache.set(key, { data: result, timestamp: now });
       setStats(result);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to fetch contract statistics');
-      setError(error);
-      console.error('Error fetching contract stats:', error);
+      const context: ErrorContext = {
+        component: 'useContractStats',
+        action: 'fetchStats',
+        metadata: { cacheKey }
+      };
+      const enhancedError = errorService.handleError(err as Error, context);
+      setError(enhancedError);
+      setUserMessage(errorService.formatErrorMessage(enhancedError));
+      console.error('Error fetching contract stats:', enhancedError);
     } finally {
       setLoading(false);
     }
@@ -401,11 +420,18 @@ export function useContractStats(options: { autoFetch?: boolean; cacheKey?: stri
     }
   }, [autoFetch, fetchStats]);
 
+  const clearError = useCallback(() => {
+    setError(null);
+    setUserMessage(null);
+  }, []);
+
   return {
     stats,
     loading,
     error,
+    userMessage,
     refetch: fetchStats,
+    clearError,
   };
 }
 
@@ -416,7 +442,8 @@ export function useContractSubscription(options: UseContractSubscriptionOptions 
   const { filters, autoStart = true } = options;
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<EnhancedError | null>(null);
+  const [userMessage, setUserMessage] = useState<string | null>(null);
 
   const contractRepository = useRef(new ContractRepository()).current;
   const unsubscribeRef = useRef<(() => void) | null>(null);
@@ -440,10 +467,16 @@ export function useContractSubscription(options: UseContractSubscriptionOptions 
         }
       );
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to start contract subscription');
-      setError(error);
+      const context: ErrorContext = {
+        component: 'useContractSubscription',
+        action: 'startSubscription',
+        metadata: { filters }
+      };
+      const enhancedError = errorService.handleError(err as Error, context);
+      setError(enhancedError);
+      setUserMessage(errorService.formatErrorMessage(enhancedError));
       setLoading(false);
-      console.error('Error starting contract subscription:', error);
+      console.error('Error starting contract subscription:', enhancedError);
     }
   }, [contractRepository, filters]);
 
@@ -465,11 +498,18 @@ export function useContractSubscription(options: UseContractSubscriptionOptions 
     };
   }, [autoStart, startSubscription, unsubscribe]);
 
+  const clearError = useCallback(() => {
+    setError(null);
+    setUserMessage(null);
+  }, []);
+
   return {
     contracts,
     loading,
     error,
+    userMessage,
     unsubscribe,
+    clearError,
   };
 }
 
@@ -479,7 +519,8 @@ export function useContractSubscription(options: UseContractSubscriptionOptions 
 export function useExpiringContracts(daysAhead: number = 30): UseContractsResult {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<EnhancedError | null>(null);
+  const [userMessage, setUserMessage] = useState<string | null>(null);
 
   const contractRepository = useRef(new ContractRepository()).current;
 
@@ -491,9 +532,15 @@ export function useExpiringContracts(daysAhead: number = 30): UseContractsResult
       const result = await contractRepository.getExpiringContracts(daysAhead);
       setContracts(result);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to fetch expiring contracts');
-      setError(error);
-      console.error('Error fetching expiring contracts:', error);
+      const context: ErrorContext = {
+        component: 'useExpiringContracts',
+        action: 'fetchExpiringContracts',
+        metadata: { daysAhead }
+      };
+      const enhancedError = errorService.handleError(err as Error, context);
+      setError(enhancedError);
+      setUserMessage(errorService.formatErrorMessage(enhancedError));
+      console.error('Error fetching expiring contracts:', enhancedError);
     } finally {
       setLoading(false);
     }
@@ -503,11 +550,18 @@ export function useExpiringContracts(daysAhead: number = 30): UseContractsResult
     fetchExpiringContracts();
   }, [fetchExpiringContracts]);
 
+  const clearError = useCallback(() => {
+    setError(null);
+    setUserMessage(null);
+  }, []);
+
   return {
     contracts,
     loading,
     error,
+    userMessage,
     refetch: fetchExpiringContracts,
     refresh: fetchExpiringContracts,
+    clearError,
   };
 }

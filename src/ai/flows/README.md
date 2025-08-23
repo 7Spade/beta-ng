@@ -1,25 +1,21 @@
-# AI Flows 目錄
+# AI Flows
 
-此目錄包含 Genkit AI 流程的實作，用於自動化業務流程和資料處理。
+此目錄包含 Genkit AI 流程的定義。
 
-## 主要流程
+## 流程
 
-- **`extract-work-items-flow.ts`**: 從文件中提取工作項目
-- **`generate-knowledge-entry-flow.ts`**: 生成知識庫條目
-- **`generate-skill-flow.ts`**: 生成技能建議
-- **`generate-subtasks-flow.ts`**: 生成子任務建議
-- **`summarize-contract-flow.ts`**: 合約摘要生成
-- **`workflow-optimization-flow.ts`**: 工作流程優化
+- **`extract-work-items-flow.ts`** - 工作項目提取流程
+- **`generate-knowledge-entry-flow.ts`** - 知識條目生成流程
+- **`generate-skill-flow.ts`** - 技能生成流程
+- **`generate-subtasks-flow.ts`** - 子任務生成流程
+- **`summarize-contract-flow.ts`** - 合約摘要流程
+- **`workflow-optimization-flow.ts`** - 工作流程優化流程
 
-## 使用方式
+## 用途
 
-這些流程透過 Genkit 框架執行，提供 AI 驅動的自動化功能。
-
-## 設計原則
-
-- 清晰的流程定義
-- 錯誤處理和重試機制
-- 可配置的參數
-- 詳細的執行日誌
+- 實現智能文檔處理
+- 自動化工作流程
+- 提供 AI 輔助功能
+- 支援智能分析和建議
 
 

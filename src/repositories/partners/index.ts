@@ -1,2 +1,3 @@
 // Partner repository exports
-export * from './partner.repository';
+// TODO: Implement partner.repository.ts
+// export * from './partner.repository';

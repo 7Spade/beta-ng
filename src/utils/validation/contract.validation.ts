@@ -610,6 +610,16 @@ export function validateContractBusinessRules(contract: Partial<Contract>): Vali
         code: 'DURATION_TOO_LONG'
       });
     }
+
+    // Business rule: Contract duration should be at least 1 day
+    const durationDays = (contract.endDate.getTime() - contract.startDate.getTime()) / (1000 * 60 * 60 * 24);
+    if (durationDays < 1) {
+      errors.push({
+        field: 'endDate',
+        message: '合約期間至少需要1天',
+        code: 'DURATION_TOO_SHORT'
+      });
+    }
   }
 
   // Business rule: Total payment amount should not exceed contract value by more than 20%
@@ -624,6 +634,15 @@ export function validateContractBusinessRules(contract: Partial<Contract>): Vali
         code: 'PAYMENTS_EXCEED_CONTRACT_VALUE'
       });
     }
+
+    // Business rule: At least one payment should be defined for contracts over certain value
+    if (contract.totalValue > 100000 && contract.payments.length === 0) {
+      errors.push({
+        field: 'payments',
+        message: '超過10萬元的合約必須定義付款計劃',
+        code: 'LARGE_CONTRACT_REQUIRES_PAYMENTS'
+      });
+    }
   }
 
   // Business rule: Active contracts should have future end dates
@@ -636,6 +655,222 @@ export function validateContractBusinessRules(contract: Partial<Contract>): Vali
         code: 'ACTIVE_CONTRACT_PAST_END_DATE'
       });
     }
+  }
+
+  // Business rule: Completed contracts should have past end dates
+  if (contract.status === '已完成' && contract.endDate) {
+    const now = new Date();
+    if (contract.endDate > now) {
+      errors.push({
+        field: 'status',
+        message: '結束日期在未來的合約不能標記為已完成',
+        code: 'COMPLETED_CONTRACT_FUTURE_END_DATE'
+      });
+    }
+  }
+
+  // Business rule: Validate change order impacts
+  if (contract.changeOrders && contract.changeOrders.length > 0) {
+    const totalCostImpact = contract.changeOrders
+      .filter(co => co.status === '已核准')
+      .reduce((sum, co) => sum + co.impact.cost, 0);
+    
+    if (contract.totalValue && Math.abs(totalCostImpact) > contract.totalValue * 0.5) {
+      errors.push({
+        field: 'changeOrders',
+        message: '變更單總成本影響不能超過原合約價值的50%',
+        code: 'CHANGE_ORDER_IMPACT_TOO_LARGE'
+      });
+    }
+  }
+
+  // Business rule: Validate payment schedule consistency
+  if (contract.payments && contract.payments.length > 0) {
+    const paidPayments = contract.payments.filter(p => p.status === '已付款');
+    const totalPaid = paidPayments.reduce((sum, p) => sum + p.amount, 0);
+    
+    // Check if paid amount is reasonable compared to contract progress
+    if (contract.startDate && contract.endDate) {
+      const now = new Date();
+      const totalDuration = contract.endDate.getTime() - contract.startDate.getTime();
+      const elapsedDuration = Math.max(0, now.getTime() - contract.startDate.getTime());
+      const progressRatio = Math.min(1, elapsedDuration / totalDuration);
+      
+      // Allow some flexibility (±30%) in payment vs progress ratio
+      const expectedPayment = (contract.totalValue || 0) * progressRatio;
+      const paymentRatio = totalPaid / (contract.totalValue || 1);
+      
+      if (paymentRatio > progressRatio + 0.3) {
+        errors.push({
+          field: 'payments',
+          message: '已付款金額相對於合約進度過高',
+          code: 'OVERPAYMENT_DETECTED'
+        });
+      }
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
+/**
+ * Validate contract data consistency
+ */
+export function validateContractDataConsistency(contract: Partial<Contract>): ValidationResult {
+  const errors: ValidationError[] = [];
+
+  // Check for duplicate payment IDs
+  if (contract.payments && contract.payments.length > 1) {
+    const paymentIds = contract.payments.map(p => p.id);
+    const uniqueIds = new Set(paymentIds);
+    
+    if (uniqueIds.size !== paymentIds.length) {
+      errors.push({
+        field: 'payments',
+        message: '付款記錄中存在重複的ID',
+        code: 'DUPLICATE_PAYMENT_IDS'
+      });
+    }
+  }
+
+  // Check for duplicate change order IDs
+  if (contract.changeOrders && contract.changeOrders.length > 1) {
+    const changeOrderIds = contract.changeOrders.map(co => co.id);
+    const uniqueIds = new Set(changeOrderIds);
+    
+    if (uniqueIds.size !== changeOrderIds.length) {
+      errors.push({
+        field: 'changeOrders',
+        message: '變更單記錄中存在重複的ID',
+        code: 'DUPLICATE_CHANGE_ORDER_IDS'
+      });
+    }
+  }
+
+  // Validate payment dates are within contract period
+  if (contract.payments && contract.startDate && contract.endDate) {
+    contract.payments.forEach((payment, index) => {
+      if (payment.requestDate < contract.startDate! || payment.requestDate > contract.endDate!) {
+        errors.push({
+          field: `payments[${index}].requestDate`,
+          message: '付款申請日期必須在合約期間內',
+          code: 'PAYMENT_DATE_OUT_OF_RANGE'
+        });
+      }
+
+      if (payment.paidDate && (payment.paidDate < contract.startDate! || payment.paidDate > new Date())) {
+        errors.push({
+          field: `payments[${index}].paidDate`,
+          message: '付款日期不能早於合約開始日期或晚於今天',
+          code: 'INVALID_PAYMENT_DATE'
+        });
+      }
+    });
+  }
+
+  // Validate change order dates
+  if (contract.changeOrders && contract.startDate && contract.endDate) {
+    contract.changeOrders.forEach((changeOrder, index) => {
+      if (changeOrder.date < contract.startDate! || changeOrder.date > contract.endDate!) {
+        errors.push({
+          field: `changeOrders[${index}].date`,
+          message: '變更單日期必須在合約期間內',
+          code: 'CHANGE_ORDER_DATE_OUT_OF_RANGE'
+        });
+      }
+    });
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
+/**
+ * Validate contract for specific business scenarios
+ */
+export function validateContractForScenario(
+  contract: Partial<Contract>,
+  scenario: 'creation' | 'completion' | 'termination' | 'renewal'
+): ValidationResult {
+  const errors: ValidationError[] = [];
+
+  switch (scenario) {
+    case 'creation':
+      // Additional validations for contract creation
+      if (!contract.startDate || contract.startDate < new Date()) {
+        // Allow contracts to start today or in the future
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (!contract.startDate || contract.startDate < today) {
+          errors.push({
+            field: 'startDate',
+            message: '新合約的開始日期不能早於今天',
+            code: 'START_DATE_IN_PAST'
+          });
+        }
+      }
+      break;
+
+    case 'completion':
+      // Validations for marking contract as completed
+      if (contract.payments) {
+        const unpaidPayments = contract.payments.filter(p => p.status !== '已付款');
+        if (unpaidPayments.length > 0) {
+          errors.push({
+            field: 'status',
+            message: '存在未付款項目，無法標記合約為已完成',
+            code: 'UNPAID_PAYMENTS_EXIST'
+          });
+        }
+      }
+
+      if (contract.changeOrders) {
+        const pendingChangeOrders = contract.changeOrders.filter(co => co.status === '待處理');
+        if (pendingChangeOrders.length > 0) {
+          errors.push({
+            field: 'status',
+            message: '存在待處理的變更單，無法標記合約為已完成',
+            code: 'PENDING_CHANGE_ORDERS_EXIST'
+          });
+        }
+      }
+      break;
+
+    case 'termination':
+      // Validations for contract termination
+      if (contract.status === '已完成') {
+        errors.push({
+          field: 'status',
+          message: '已完成的合約不能被終止',
+          code: 'CANNOT_TERMINATE_COMPLETED_CONTRACT'
+        });
+      }
+      break;
+
+    case 'renewal':
+      // Validations for contract renewal
+      if (contract.status !== '已完成' && contract.status !== '已終止') {
+        errors.push({
+          field: 'status',
+          message: '只有已完成或已終止的合約可以續約',
+          code: 'INVALID_STATUS_FOR_RENEWAL'
+        });
+      }
+
+      if (contract.endDate && contract.endDate > new Date()) {
+        errors.push({
+          field: 'endDate',
+          message: '尚未到期的合約不能續約',
+          code: 'CONTRACT_NOT_EXPIRED'
+        });
+      }
+      break;
   }
 
   return {

@@ -6,7 +6,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { Contract } from '../../types/entities/contract.types';
 import { CreateContractDto, UpdateContractDto } from '../../types/dto/contract.dto';
-import { ExportOptions, ValidationResult } from '../../types/services/contract.service.types';
+import { ExportOptions, ValidationResult, ValidationError } from '../../types/services/contract.service.types';
 import { ContractService } from '../../services/contracts/contract.service';
 import { errorService, validationService } from '../../services/shared';
 import { EnhancedError, ErrorContext } from '../../types/entities/error.types';
@@ -315,6 +315,7 @@ export function useContractExport(): UseContractExportResult {
   return {
     exporting,
     exportError,
+    exportUserMessage: exportError ? errorService.formatErrorMessage(exportError) : null,
     exportToCSV,
     exportToExcel,
     exportToPDF,
@@ -403,6 +404,7 @@ export function useContractBatchActions(): UseContractBatchActionsResult {
   return {
     batchLoading,
     batchError,
+    batchUserMessage: batchError ? errorService.formatErrorMessage(batchError) : null,
     batchUpdateStatus,
     batchDelete,
     batchExport,
@@ -426,7 +428,7 @@ export function useContractForm(initialData?: Partial<Contract>) {
     setIsDirty(true);
     
     // Clear validation errors for this field
-    setValidationErrors(prev => prev.filter(err => err.field !== field));
+    setValidationErrors((prev: ValidationError[]) => prev.filter((err: ValidationError) => err.field !== field));
   }, []);
 
   const validateForm = useCallback((): boolean => {
@@ -467,7 +469,7 @@ export function useContractForm(initialData?: Partial<Contract>) {
   }, [initialData]);
 
   const getFieldError = useCallback((field: string) => {
-    return validationErrors.find(err => err.field === field);
+    return validationErrors.find((err: ValidationError) => err.field === field);
   }, [validationErrors]);
 
   return {

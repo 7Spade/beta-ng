@@ -1,24 +1,19 @@
-# Overlay Components 目錄
+# Overlays 覆蓋層元件
 
-此目錄包含應用程式的覆蓋層元件，用於顯示模態對話框、彈出選單等。
+此目錄包含應用程式的覆蓋層元件，用於彈出式 UI。
 
-## 主要元件
+## 元件
 
-- **`drawer-container.tsx`**: 抽屜容器元件
-- **`modal-container.tsx`**: 模態對話框容器
-- **`popover-container.tsx`**: 彈出選單容器
-- **`tooltip-provider.tsx`**: 工具提示提供者
+- **`drawer-container.tsx`** - 抽屜容器
+- **`modal-container.tsx`** - 模態框容器
+- **`popover-container.tsx`** - 彈出框容器
+- **`tooltip-provider.tsx`** - 工具提示提供者
 
-## 使用方式
+## 用途
 
-這些元件用於創建層級化的使用者介面，提供豐富的互動體驗。
-
-## 設計原則
-
-- 一致的覆蓋層行為
-- 支援鍵盤導航
-- 適當的焦點管理
-- 響應式設計
-- 無障礙功能支援
+- 提供彈出式用戶界面
+- 支援模態對話框和側邊面板
+- 實現工具提示和彈出框
+- 管理覆蓋層的顯示和隱藏
 
 

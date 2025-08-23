@@ -1,13 +1,19 @@
-# 專案管理元件 (App Components)
+# App 功能
 
-此目錄包含所有與核心「專案管理」功能相關的 React 元件。
+此目錄包含應用程式核心功能相關的元件。
 
 ## 元件
 
-- **`dashboard/`**: 存放專案儀表板相關元件。
-- **`task-item.tsx`**: 用於顯示和互動的單一任務項。
-- **`project-progress-chart.tsx`**: 顯示專案進度的圓餅圖。
-- **`create-project-dialog.tsx`**: 用於建立新專案的對話方塊。
-- **`ai-subtask-suggestions.tsx`**: 為任務提供 AI 子任務建議的元件。
+- **`dashboard/`** - 應用程式儀表板
+  - **`dashboard.tsx`** - 主儀表板元件
+- **`ai-subtask-suggestions.tsx`** - AI 子任務建議
+- **`create-project-dialog.tsx`** - 創建專案對話框
+- **`project-progress-chart.tsx`** - 專案進度圖表
+- **`task-item.tsx`** - 任務項目元件
 
-請將任何與核心專案追蹤、任務管理相關的新元件放置於此。
+## 用途
+
+- 提供應用程式核心功能
+- 支援專案和任務管理
+- 整合 AI 輔助功能
+- 顯示進度和統計信息

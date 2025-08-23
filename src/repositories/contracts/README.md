@@ -1,19 +1,19 @@
-# Contracts Repository 目錄
+# Contracts Repositories
 
-此目錄包含合約相關的資料存取實作。
+此目錄包含合約相關的數據訪問層。
+
+## 檔案
+
+- **`contract.repository.ts`** - 合約數據操作實現
+- **`contract.repository.interface.ts`** - 合約倉儲接口定義
+- **`contract.types.ts`** - 合約相關類型定義
+- **`index.ts`** - 合約倉儲導出文件
 
 ## 用途
 
-- 合約資料的 CRUD 操作
-- 合約狀態管理
-- 合約搜尋和篩選
-- 合約相關的業務邏輯
-
-## 設計原則
-
-- 遵循 Repository 模式
-- 提供統一的資料存取介面
-- 支援合約生命週期管理
-- 整合 Firebase 服務
+- 管理合約數據的增刪改查
+- 提供合約操作的統一接口
+- 實現合約數據的驗證和轉換
+- 支援合約業務邏輯的數據需求
 
 

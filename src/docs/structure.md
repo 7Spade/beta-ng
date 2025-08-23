@@ -1,3 +1,5 @@
+│  setupTests.ts
+│
 ├─ai
 │  │  dev.ts
 │  │  genkit.ts
@@ -8,6 +10,7 @@
 │          generate-knowledge-entry-flow.ts
 │          generate-skill-flow.ts
 │          generate-subtasks-flow.ts
+│          README.md
 │          summarize-contract-flow.ts
 │          workflow-optimization-flow.ts
 │
@@ -72,10 +75,13 @@
 │  │              page.tsx
 │  │
 │  └─actions
-│          contracts.actions.ts
-│          documents.actions.ts
-│          knowledge.actions.ts
-│          README.md
+│      │  contracts.actions.ts
+│      │  documents.actions.ts
+│      │  knowledge.actions.ts
+│      │  README.md
+│      │
+│      └─__tests__
+│              contracts.actions.test.ts
 │
 ├─components
 │  │  README.md
@@ -106,13 +112,30 @@
 │  │  │  │  README.md
 │  │  │  │
 │  │  │  ├─dashboard
-│  │  │  │      dashboard.tsx
+│  │  │  │  │  dashboard-updated-example.tsx
+│  │  │  │  │  dashboard.tsx
+│  │  │  │  │
+│  │  │  │  └─__tests__
+│  │  │  │          dashboard.test.tsx
 │  │  │  │
-│  │  │  └─details
-│  │  │          contract-changes-tab.tsx
-│  │  │          contract-details-tab.tsx
-│  │  │          contract-history-tab.tsx
-│  │  │          contract-payments-tab.tsx
+│  │  │  ├─details
+│  │  │  │      contract-changes-tab.tsx
+│  │  │  │      contract-details-tab.tsx
+│  │  │  │      contract-history-tab.tsx
+│  │  │  │      contract-payments-tab.tsx
+│  │  │  │
+│  │  │  └─table
+│  │  │      │  CLEANUP_SUMMARY.md
+│  │  │      │  contracts-row.tsx
+│  │  │      │  contracts-table.tsx
+│  │  │      │  index.ts
+│  │  │      │  TYPE_FIXES_SUMMARY.md
+│  │  │      │
+│  │  │      └─__tests__
+│  │  │              contracts-row.test.tsx
+│  │  │              contracts-table.test.tsx
+│  │  │              integration.test.tsx
+│  │  │              TEST_SUMMARY.md
 │  │  │
 │  │  ├─dashboard
 │  │  │      ai-usage-log.tsx
@@ -150,6 +173,8 @@
 │  │  │          workflow-builder.tsx
 │  │  │
 │  │  └─team
+│  │      │  README.md
+│  │      │
 │  │      ├─knowledge-base
 │  │      │      entry-form-dialog.tsx
 │  │      │
@@ -174,6 +199,7 @@
 │  │  │      app-provider.tsx
 │  │  │      app-shell.tsx
 │  │  │      layout-wrapper.tsx
+│  │  │      README.md
 │  │  │      theme-provider.tsx
 │  │  │
 │  │  ├─navigation
@@ -183,6 +209,7 @@
 │  │  │      navigation-menu.tsx
 │  │  │      notification-center.tsx
 │  │  │      quick-actions.tsx
+│  │  │      README.md
 │  │  │      search-command.tsx
 │  │  │      unified-sidebar.tsx
 │  │  │      user-menu.tsx
@@ -191,10 +218,12 @@
 │  │  │      drawer-container.tsx
 │  │  │      modal-container.tsx
 │  │  │      popover-container.tsx
+│  │  │      README.md
 │  │  │      tooltip-provider.tsx
 │  │  │
 │  │  ├─responsive
 │  │  │      mobile-menu.tsx
+│  │  │      README.md
 │  │  │      responsive-wrapper.tsx
 │  │  │
 │  │  └─shared
@@ -202,6 +231,7 @@
 │  │          logo.tsx
 │  │          page-container.tsx
 │  │          page-header.tsx
+│  │          README.md
 │  │          section-divider.tsx
 │  │          status-indicator.tsx
 │  │
@@ -229,6 +259,7 @@
 │          popover.tsx
 │          progress.tsx
 │          radio-group.tsx
+│          README.md
 │          scroll-area.tsx
 │          select.tsx
 │          separator.tsx
@@ -249,8 +280,16 @@
 │      README.md
 │
 ├─context
-│      ProjectContext.tsx
-│      README.md
+│  │  index.ts
+│  │  ProjectContext.tsx
+│  │  README.md
+│  │
+│  ├─contracts
+│  ├─projects
+│  └─shared
+│          app.context.tsx
+│          error.context.tsx
+│          index.ts
 │
 ├─docs
 │      database.md
@@ -258,9 +297,28 @@
 │      structure.md
 │
 ├─hooks
-│      README.md
-│      use-mobile.tsx
-│      use-toast.ts
+│  │  index.ts
+│  │  README.md
+│  │  use-mobile.tsx
+│  │  use-toast.ts
+│  │
+│  ├─business
+│  │      index.ts
+│  │      README.md
+│  │      use-contract-actions.ts
+│  │      use-contract-stats.ts
+│  │
+│  ├─data
+│  │      index.ts
+│  │      README.md
+│  │      use-contracts.ts
+│  │
+│  └─ui
+│          index.ts
+│          README.md
+│          use-error-handling.ts
+│          use-form-state.ts
+│          use-table-state.ts
 │
 ├─lib
 │      firebase.ts
@@ -269,6 +327,112 @@
 │      types.ts
 │      utils.ts
 │
-└─services
-        logging.service.ts
-        README.md
+├─repositories
+│  │  index.ts
+│  │  README.md
+│  │
+│  ├─base
+│  │      base.repository.ts
+│  │      firebase.repository.ts
+│  │      index.ts
+│  │      README.md
+│  │
+│  ├─contracts
+│  │      contract.repository.interface.ts
+│  │      contract.repository.ts
+│  │      contract.types.ts
+│  │      index.ts
+│  │      README.md
+│  │
+│  ├─partners
+│  │      index.ts
+│  │      README.md
+│  │
+│  └─projects
+│          index.ts
+│          project.repository.ts
+│          README.md
+│
+├─services
+│  │  index.ts
+│  │  logging.service.ts
+│  │  README.md
+│  │
+│  ├─contracts
+│  │  │  contract-export.service.ts
+│  │  │  contract-stats.service.ts
+│  │  │  contract.service.ts
+│  │  │  index.ts
+│  │  │  README-export-service.md
+│  │  │  README-stats-service.md
+│  │  │  README.md
+│  │  │
+│  │  └─__tests__
+│  │          contract-export.service.test.ts
+│  │          contract-stats.service.test.ts
+│  │
+│  ├─partners
+│  │      index.ts
+│  │      README.md
+│  │
+│  ├─projects
+│  │      index.ts
+│  │      project.service.ts
+│  │      README.md
+│  │
+│  └─shared
+│      │  error.service.ts
+│      │  export.service.ts
+│      │  index.ts
+│      │  README.md
+│      │  validation.service.ts
+│      │
+│      └─__tests__
+│              export.service.test.ts
+│              validation.service.test.ts
+│
+├─types
+│  │  index.ts
+│  │  README.md
+│  │
+│  ├─dto
+│  │      contract.dto.ts
+│  │      index.ts
+│  │      project.dto.ts
+│  │      README.md
+│  │
+│  ├─entities
+│  │      contract.types.ts
+│  │      error.types.ts
+│  │      index.ts
+│  │      project.types.ts
+│  │      README.md
+│  │      shared.types.ts
+│  │
+│  └─services
+│          contract.service.types.ts
+│          index.ts
+│          project.service.types.ts
+│          README.md
+│          repository.types.ts
+│
+└─utils
+    │  index.ts
+    │  README.md
+    │
+    ├─formatting
+    │      currency.formatter.ts
+    │      date.formatter.ts
+    │      index.ts
+    │      README.md
+    │
+    ├─transformation
+    │      firebase.transformer.ts
+    │      index.ts
+    │      README.md
+    │
+    └─validation
+            common.validation.ts
+            contract.validation.ts
+            index.ts
+            README.md

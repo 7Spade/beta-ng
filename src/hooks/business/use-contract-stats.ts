@@ -285,12 +285,18 @@ export function useMonthlyRevenue(contracts?: Contract[]): UseMonthlyRevenueResu
     }
   }, [contracts, refetch]);
 
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
   return {
     monthlyRevenue,
     loading,
     error,
+    userMessage: error ? errorService.formatErrorMessage(error) : null,
     calculateRevenue,
     refetch,
+    clearError,
   };
 }
 
@@ -340,12 +346,18 @@ export function useContractStatsSubscription(): UseContractDashboardStatsResult 
     };
   }, [fetchStats]);
 
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
   return {
     stats,
     loading,
     error,
+    userMessage: error ? errorService.formatErrorMessage(error) : null,
     refetch: fetchStats,
     refresh,
+    clearError,
   };
 }
 

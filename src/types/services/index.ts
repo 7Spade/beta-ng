@@ -3,6 +3,26 @@
  * Exports all service-related type definitions
  */
 
-export * from './contract.service.types';
-export * from './project.service.types';
-export * from './repository.types';
+// Explicitly export to avoid conflicts
+export type { 
+  DashboardStats, 
+  ExportOptions, 
+  IContractService, 
+  IContractStatsService, 
+  IContractExportService,
+  ValidationResult,
+  ValidationError
+} from './contract.service.types';
+
+export type { 
+  IProjectService 
+} from './project.service.types';
+
+export type { 
+  IBaseRepository, 
+  IFirebaseRepository,
+  RepositoryConfig,
+  QueryOptions,
+  WhereClause,
+  RepositoryError
+} from './repository.types';

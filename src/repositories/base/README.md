@@ -1,24 +1,18 @@
-# Base Repository 目錄
+# Base Repositories
 
-此目錄包含儲存庫模式的基礎類別和介面定義。
+此目錄包含基礎倉儲類和接口。
 
-## 主要檔案
+## 檔案
 
-- **`base.repository.ts`**: 基礎儲存庫抽象類別
-- **`firebase.repository.ts`**: Firebase 特定的儲存庫實作
-- **`index.ts`**: 基礎儲存庫匯出檔案
+- **`base.repository.ts`** - 基礎倉儲抽象類
+- **`firebase.repository.ts`** - Firebase 倉儲實現
+- **`index.ts`** - 倉儲導出文件
 
 ## 用途
 
-- 定義統一的資料存取介面
-- 提供共用的儲存庫功能
-- 實作 Firebase 整合邏輯
-
-## 設計原則
-
-- 遵循 Repository 模式
-- 提供統一的錯誤處理
-- 支援快取和效能優化
-- 保持與業務邏輯的分離
+- 定義倉儲模式的基礎結構
+- 提供統一的數據訪問接口
+- 實現 Firebase 特定的數據操作
+- 支援倉儲的繼承和擴展
 
 

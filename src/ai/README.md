@@ -1,12 +1,22 @@
 # AI 目錄
 
-此目錄是您應用程式中所有與 AI 相關的程式碼的家。它使用 [Google Genkit](https://firebase.google.com/docs/genkit) 來定義和協調 AI 流程。
+此目錄包含 AI 相關功能和自動化流程，基於 Genkit 框架。
 
-## 結構
+## 目錄結構
 
-- **`genkit.ts`**: 此檔案用於初始化和配置全局的 Genkit 實例。您可以在這裡設定預設模型和插件。
-- **`flows/`**: 此目錄包含所有 Genkit `flow` 的定義。每個 `flow` 封裝了一個特定的 AI 驅動任務，例如：
-  - 從文件中提取結構化數據。
-  - 根據任務標題生成子任務。
-  - 總結合約內容。
-- **`dev.ts`**: 這是一個開發用的檔案，用於匯入所有 flows，以便 Genkit 開發伺服器能夠偵測並運行它們。
+- **`flows/`** - AI 流程定義
+  - **`extract-work-items-flow.ts`** - 工作項目提取流程
+  - **`generate-knowledge-entry-flow.ts`** - 知識條目生成流程
+  - **`generate-skill-flow.ts`** - 技能生成流程
+  - **`generate-subtasks-flow.ts`** - 子任務生成流程
+  - **`summarize-contract-flow.ts`** - 合約摘要流程
+  - **`workflow-optimization-flow.ts`** - 工作流程優化流程
+- **`dev.ts`** - 開發環境配置
+- **`genkit.ts`** - Genkit 框架配置
+
+## 用途
+
+- 實現智能文檔處理
+- 自動化工作流程
+- 提供 AI 輔助功能
+- 支援智能分析和建議

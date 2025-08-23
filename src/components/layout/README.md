@@ -1,31 +1,34 @@
-# 佈局元件 (Layout Components)
+# Layout 目錄
 
-此目錄是您應用程式中所有與佈局相關的元件的中央儲存庫。它被組織成幾個子目錄，每個子目錄都有其特定的職責。
+此目錄包含應用程式的佈局相關元件，負責整體頁面結構和導航。
 
-## 結構概覽
+## 目錄結構
 
-- **`core/`**: 存放構成應用程式核心外殼的基礎元件。
-  - `AppShell`: 組合了側邊欄和頁首，形成主要的應用程式框架。
-  - `AppProvider`: 包裹了所有全局 Context Providers，如 `ThemeProvider`, `ProjectProvider`。
-  - `AppHeader`: 應用的頂部標題欄，包含麵包屑導航和側邊欄觸發器。
+- **`core/`** - 核心佈局元件
+  - **`app-header.tsx`** - 應用程式頁首
+  - **`app-provider.tsx`** - 應用程式提供者
+  - **`app-shell.tsx`** - 應用程式外殼
+  - **`layout-wrapper.tsx`** - 佈局包裝器
+  - **`theme-provider.tsx`** - 主題提供者
+- **`navigation/`** - 導航相關元件
+  - **`breadcrumb.tsx`** - 麵包屑導航
+  - **`navigation-menu.tsx`** - 導航選單
+  - **`unified-sidebar.tsx`** - 統一側邊欄
+  - **`user-menu.tsx`** - 用戶選單
+- **`overlays/`** - 覆蓋層元件
+  - **`drawer-container.tsx`** - 抽屜容器
+  - **`modal-container.tsx`** - 模態框容器
+  - **`popover-container.tsx`** - 彈出框容器
+- **`responsive/`** - 響應式元件
+  - **`mobile-menu.tsx`** - 移動端選單
+  - **`responsive-wrapper.tsx`** - 響應式包裝器
+- **`shared/`** - 共享佈局元件
+  - **`page-container.tsx`** - 頁面容器
+  - **`page-header.tsx`** - 頁面標題
 
-- **`navigation/`**: 包含所有與導航相關的元件。
-  - `UnifiedSidebar`: 響應式、可折疊的側邊欄。
-  - `Breadcrumb`: 根據當前路由自動生成的麵包屑導航。
-  - `UserMenu`: 右上角的用戶個人資料下拉選單。
+## 用途
 
-- **`overlays/`**: 用於處理彈出層、對話方塊等覆蓋式 UI。
-  - `ModalContainer`: 標準的模態對話方塊。
-  - `DrawerContainer`: 從螢幕邊緣滑出的抽屜式面板。
-  - `TooltipProvider`: 為應用提供全局的提示框功能。
-
-- **`responsive/`**: 包含用於處理響應式設計的元件。
-  - `MobileMenu`: 在行動裝置上顯示的側邊欄選單。
-  - `ResponsiveWrapper`: 根據螢幕斷點渲染不同元件的包裝器。
-
-- **`shared/`**: 存放可在應用程式各處重用的通用佈局元件。
-  - `PageContainer`: 提供一致頁面內邊距和寬度限制的容器。
-  - `PageHeader`: 用於頁面標題和可選操作按鈕的標準化頁首。
-  - `EmptyState`: 用於顯示列表或內容為空時的佔位元件。
-
-- **`index.ts`**: 從此目錄中匯出所有可用的佈局元件，方便從單一入口點導入。
+- 定義應用程式的整體佈局結構
+- 提供一致的導航體驗
+- 支援響應式設計
+- 管理主題和樣式

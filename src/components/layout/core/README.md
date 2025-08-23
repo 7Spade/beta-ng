@@ -1,24 +1,20 @@
-# Layout Core Components 目錄
+# Core 佈局元件
 
-此目錄包含應用程式的核心佈局元件，負責整體結構和主題管理。
+此目錄包含應用程式的核心佈局元件。
 
-## 主要元件
+## 元件
 
-- **`app-header.tsx`**: 應用程式頂部導航列
-- **`app-provider.tsx`**: 應用程式級別的 Context Provider
-- **`app-shell.tsx`**: 應用程式的主要外殼結構
-- **`layout-wrapper.tsx`**: 佈局包裝器，提供一致的頁面結構
-- **`theme-provider.tsx`**: 主題管理 Provider
+- **`app-header.tsx`** - 應用程式頁首
+- **`app-provider.tsx`** - 應用程式提供者
+- **`app-shell.tsx`** - 應用程式外殼
+- **`layout-wrapper.tsx`** - 佈局包裝器
+- **`theme-provider.tsx`** - 主題提供者
 
-## 使用方式
+## 用途
 
-這些元件通常在應用程式的根層級使用，提供整體的佈局結構和主題支援。
-
-## 設計原則
-
-- 提供一致的佈局結構
-- 支援響應式設計
-- 整合主題系統
-- 保持元件的可重用性
+- 構成應用程式核心外殼
+- 提供全局 Context 和主題
+- 定義主要佈局結構
+- 管理應用程式狀態
 
 

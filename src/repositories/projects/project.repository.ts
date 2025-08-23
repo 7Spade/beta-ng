@@ -10,7 +10,6 @@ import {
   getDoc, 
   addDoc, 
   updateDoc, 
-  deleteDoc, 
   query, 
   where, 
   orderBy, 
@@ -21,7 +20,7 @@ import { db } from '../../lib/firebase';
 import { FirebaseRepository } from '../base/firebase.repository';
 import { Project, ProjectFilters, ProjectStats } from '../../types/entities/project.types';
 import { CreateProjectDto, UpdateProjectDto } from '../../types/dto/project.dto';
-import { transformFirebaseTimestamp } from '../../utils/transformation/firebase.transformer';
+import { timestampToDate } from '../../utils/transformation/firebase.transformer';
 
 export interface IProjectRepository {
   findById(id: string): Promise<Project | null>;
@@ -40,7 +39,7 @@ export class ProjectRepository extends FirebaseRepository<Project> implements IP
   protected collectionName = 'projects';
 
   constructor() {
-    super('projects');
+    super();
   }
 
   /**
@@ -198,12 +197,12 @@ export class ProjectRepository extends FirebaseRepository<Project> implements IP
       description: data.description,
       client: data.client,
       clientRepresentative: data.clientRepresentative,
-      startDate: transformFirebaseTimestamp(data.startDate),
-      endDate: transformFirebaseTimestamp(data.endDate),
+      startDate: timestampToDate(data.startDate) || new Date(),
+      endDate: timestampToDate(data.endDate) || new Date(),
       tasks: data.tasks || [],
       value: data.value,
-      createdAt: transformFirebaseTimestamp(data.createdAt),
-      updatedAt: transformFirebaseTimestamp(data.updatedAt),
+      createdAt: timestampToDate(data.createdAt) || new Date(),
+      updatedAt: timestampToDate(data.updatedAt) || new Date(),
     };
   }
 
