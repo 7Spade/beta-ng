@@ -12,7 +12,6 @@
 │          workflow-optimization-flow.ts
 │
 ├─app
-│  │  favicon.ico
 │  │  globals.css
 │  │  layout.tsx
 │  │  page.tsx
@@ -36,9 +35,6 @@
 │  │  │
 │  │  ├─partnerverse
 │  │  │  │  page.tsx
-│  │  │  │
-│  │  │  ├─dashboard
-│  │  │  │      page.tsx
 │  │  │  │
 │  │  │  ├─partners
 │  │  │  │      page.tsx
@@ -90,6 +86,7 @@
 │  │  ├─app
 │  │  │  │  ai-subtask-suggestions.tsx
 │  │  │  │  create-project-dialog.tsx
+│  │  │  │  project-detail-client.tsx
 │  │  │  │  project-progress-chart.tsx
 │  │  │  │  README.md
 │  │  │  │  task-item.tsx
@@ -105,8 +102,14 @@
 │  │  │  │  dashboard-stats.tsx
 │  │  │  │  README.md
 │  │  │  │
-│  │  │  └─dashboard
-│  │  │          dashboard.tsx
+│  │  │  ├─dashboard
+│  │  │  │      dashboard.tsx
+│  │  │  │
+│  │  │  └─details
+│  │  │          contract-changes-tab.tsx
+│  │  │          contract-details-tab.tsx
+│  │  │          contract-history-tab.tsx
+│  │  │          contract-payments-tab.tsx
 │  │  │
 │  │  ├─dashboard
 │  │  │      ai-usage-log.tsx
@@ -117,18 +120,24 @@
 │  │  │      work-items-table.tsx
 │  │  │
 │  │  ├─partnerverse
+│  │  │  │  partner-dashboard.tsx
 │  │  │  │  README.md
-│  │  │  │
-│  │  │  ├─dashboard
-│  │  │  │      dashboard.tsx
 │  │  │  │
 │  │  │  ├─partners
 │  │  │  │  │  partner-list.tsx
 │  │  │  │  │  partner-profile.tsx
 │  │  │  │  │
-│  │  │  │  └─forms
-│  │  │  │          contact-form.tsx
-│  │  │  │          partner-form.tsx
+│  │  │  │  ├─forms
+│  │  │  │  │      contact-form.tsx
+│  │  │  │  │      partner-form.tsx
+│  │  │  │  │
+│  │  │  │  └─profile-tabs
+│  │  │  │          compliance-tab.tsx
+│  │  │  │          contacts-tab.tsx
+│  │  │  │          contracts-tab.tsx
+│  │  │  │          financial-workflows-tab.tsx
+│  │  │  │          performance-tab.tsx
+│  │  │  │          transactions-tab.tsx
 │  │  │  │
 │  │  │  └─workflows
 │  │  │          optimization-assistant.tsx
@@ -152,6 +161,7 @@
 │  │              skills-list.tsx
 │  │
 │  ├─layout
+│  │  │  index.ts
 │  │  │  README.md
 │  │  │
 │  │  ├─core
@@ -162,7 +172,6 @@
 │  │  │
 │  │  ├─navigation
 │  │  │      breadcrumb.tsx
-│  │  │      mobile-menu.tsx
 │  │  │      navigation-menu-item.tsx
 │  │  │      navigation-menu.tsx
 │  │  │      unified-sidebar.tsx
@@ -217,8 +226,14 @@
 │      README.md
 │
 ├─docs
+│      architecture.md
+│      CODING_GUIDELINES.md
 │      database.md
+│      deployment.md
+│      features.md
+│      nextjs-principles.md
 │      README.md
+│      requirements.md
 │      structure.md
 │
 ├─hooks

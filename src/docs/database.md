@@ -61,8 +61,8 @@
 | `scope`                | `string`            | 合約的工作範疇描述。                       |
 | `startDate`            | `Timestamp`         | 合約的開始日期。                           |
 | `endDate`              | `Timestamp`         | 合約的結束日期。                           |
-| `payments`             | `Array<Map>`        | 付款記錄陣列 (目前為空，未來可擴充)。      |
-| `changeOrders`         | `Array<Map>`        | 變更單記錄陣列 (目前為空，未來可擴充)。    |
+| `payments`             | `Array<Map>`        | 付款記錄陣列 (未來可擴充)。      |
+| `changeOrders`         | `Array<Map>`        | 變更單記錄陣列 (未來可擴充)。    |
 | `versions`             | `Array<Map>`        | 合約版本歷史記錄。                         |
 
 ### 2.3. `partners`
