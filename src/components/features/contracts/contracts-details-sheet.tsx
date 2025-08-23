@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Contract, Payment, ChangeOrder, ContractVersion } from '@/lib/types';
@@ -64,7 +65,7 @@ export function ContractDetailsSheet({ contract, isOpen, onOpenChange }: Contrac
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-3xl">
+      <SheetContent side="right" className="sm:max-w-2xl">
         <ScrollArea className="h-full pr-6">
           <SheetHeader className="mb-4">
             <SheetTitle>{contract.name}</SheetTitle>
