@@ -275,17 +275,19 @@ export class ContractService implements IContractService {
   /**
    * Export contracts
    */
-  async exportContracts(contracts: Contract[], options: ExportOptions): Promise<Blob> {
+  async exportContracts(contracts: Contract[], options: ExportOptions): Promise<void> {
     try {
       switch (options.format) {
         case 'csv':
-          return await this.contractExportService.exportContractsToCSV(contracts);
-        case 'excel':
-          return await this.contractExportService.exportContractsToExcel(contracts);
-        case 'pdf':
-          return await this.contractExportService.exportContractsToPDF(contracts);
+          ContractExportService.exportContractsToCSV(contracts, {
+            includePayments: options.includePayments,
+            includeChangeOrders: options.includeChangeOrders,
+            dateRange: options.dateRange,
+            statusFilter: options.filters?.status ? [options.filters.status] : undefined
+          });
+          break;
         default:
-          throw new Error(`Unsupported export format: ${options.format}`);
+          throw new Error(`Unsupported export format: ${options.format}. Only CSV is currently supported.`);
       }
     } catch (error) {
       console.error('Error exporting contracts:', error);

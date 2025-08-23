@@ -58,7 +58,7 @@ export interface IContractService {
   getContractStats(filters?: ContractFilters): Promise<ContractStats>;
   
   // Export functionality
-  exportContracts(contracts: Contract[], options: ExportOptions): Promise<Blob>;
+  exportContracts(contracts: Contract[], options: ExportOptions): Promise<void>;
 }
 
 // Contract statistics service interface
@@ -72,8 +72,8 @@ export interface IContractStatsService {
 
 // Contract export service interface
 export interface IContractExportService {
-  exportContractsToCSV(contracts: Contract[]): Promise<Blob>;
-  exportContractsToExcel(contracts: Contract[]): Promise<Blob>;
-  exportContractsToPDF(contracts: Contract[]): Promise<Blob>;
-  generateExportData(contracts: Contract[], options: ExportOptions): any[];
+  exportContractsToCSV(contracts: Contract[], options?: any): void;
+  exportContractsWithPayments(contracts: Contract[], options?: any): void;
+  exportContractsWithChangeOrders(contracts: Contract[], options?: any): void;
+  exportContractSummary(contracts: Contract[], options?: any): void;
 }
