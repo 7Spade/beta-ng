@@ -4,6 +4,9 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { EnhancedError, ErrorContext } from '../../types/entities/error.types';
+import { errorService } from '../../services/shared/error.service';
+import { useErrorHandling } from './use-error-handling';
 
 // Types for form state management
 export interface FormField<T = any> {
@@ -20,6 +23,8 @@ export interface FormState<T extends Record<string, any> = Record<string, any>> 
   isSubmitting: boolean;
   submitCount: number;
   errors: Record<string, string>;
+  globalError: EnhancedError | null;
+  userMessage: string | null;
 }
 
 export interface ValidationRule<T = any> {
@@ -44,6 +49,12 @@ export interface UseFormStateResult<T extends Record<string, any> = Record<strin
   values: T;
   errors: Record<string, string>;
   touched: Record<keyof T, boolean>;
+  
+  // Error handling
+  globalError: EnhancedError | null;
+  userMessage: string | null;
+  hasError: boolean;
+  clearGlobalError: () => void;
   
   // Field operations
   setValue: <K extends keyof T>(field: K, value: T[K]) => void;
@@ -94,6 +105,8 @@ export interface UseFormStateOptions<T extends Record<string, any> = Record<stri
   validateOnSubmit?: boolean;
   onSubmit?: (values: T) => Promise<void> | void;
   onValidationError?: (errors: Record<string, string>) => void;
+  onError?: (error: EnhancedError) => void;
+  componentName?: string;
 }
 
 /**
@@ -110,7 +123,15 @@ export function useFormState<T extends Record<string, any> = Record<string, any>
     validateOnSubmit = true,
     onSubmit,
     onValidationError,
+    onError,
+    componentName = 'useFormState',
   } = options;
+
+  // Error handling
+  const { handleError, clearError: clearGlobalErrorHandler } = useErrorHandling({
+    showToast: false,
+    persistError: false,
+  });
 
   // Initialize form state
   const [formState, setFormState] = useState<FormState<T>>(() => {
@@ -132,81 +153,121 @@ export function useFormState<T extends Record<string, any> = Record<string, any>
       isSubmitting: false,
       submitCount: 0,
       errors: {},
+      globalError: null,
+      userMessage: null,
     };
   });
 
   const validationRef = useRef(validationSchema);
   validationRef.current = validationSchema;
 
+  const createErrorContext = useCallback((action: string, metadata?: any): ErrorContext => ({
+    component: componentName,
+    action,
+    metadata
+  }), [componentName]);
+
   // Validation function
   const validateField = useCallback((field: keyof T, value: T[keyof T]): string | null => {
-    const schema = validationRef.current;
-    if (!schema || !schema[field as keyof T]) return null;
+    try {
+      const schema = validationRef.current;
+      if (!schema || !schema[field as keyof T]) return null;
 
-    const fieldRules = schema[field as keyof T];
-    const rules = Array.isArray(fieldRules) ? fieldRules as ValidationRule<T[keyof T]>[] : [fieldRules as ValidationRule<T[keyof T]>];
+      const fieldRules = schema[field as keyof T];
+      const rules = Array.isArray(fieldRules) ? fieldRules as ValidationRule<T[keyof T]>[] : [fieldRules as ValidationRule<T[keyof T]>];
 
-    for (const rule of rules) {
-      if (rule.required && (value === null || value === undefined || value === '')) {
-        return rule.message || `${String(field)} is required`;
+      for (const rule of rules) {
+        if (rule.required && (value === null || value === undefined || value === '')) {
+          return rule.message || `${String(field)} is required`;
+        }
+
+        if (rule.minLength && typeof value === 'string' && value.length < rule.minLength) {
+          return rule.message || `${String(field)} must be at least ${rule.minLength} characters`;
+        }
+
+        if (rule.maxLength && typeof value === 'string' && value.length > rule.maxLength) {
+          return rule.message || `${String(field)} must be no more than ${rule.maxLength} characters`;
+        }
+
+        if (rule.min && typeof value === 'number' && value < rule.min) {
+          return rule.message || `${String(field)} must be at least ${rule.min}`;
+        }
+
+        if (rule.max && typeof value === 'number' && value > rule.max) {
+          return rule.message || `${String(field)} must be no more than ${rule.max}`;
+        }
+
+        if (rule.pattern && typeof value === 'string' && !rule.pattern.test(value)) {
+          return rule.message || `${String(field)} format is invalid`;
+        }
+
+        if (rule.custom) {
+          const customError = rule.custom(value);
+          if (customError) return customError;
+        }
       }
 
-      if (rule.minLength && typeof value === 'string' && value.length < rule.minLength) {
-        return rule.message || `${String(field)} must be at least ${rule.minLength} characters`;
-      }
-
-      if (rule.maxLength && typeof value === 'string' && value.length > rule.maxLength) {
-        return rule.message || `${String(field)} must be no more than ${rule.maxLength} characters`;
-      }
-
-      if (rule.min && typeof value === 'number' && value < rule.min) {
-        return rule.message || `${String(field)} must be at least ${rule.min}`;
-      }
-
-      if (rule.max && typeof value === 'number' && value > rule.max) {
-        return rule.message || `${String(field)} must be no more than ${rule.max}`;
-      }
-
-      if (rule.pattern && typeof value === 'string' && !rule.pattern.test(value)) {
-        return rule.message || `${String(field)} format is invalid`;
-      }
-
-      if (rule.custom) {
-        const customError = rule.custom(value);
-        if (customError) return customError;
-      }
+      return null;
+    } catch (error) {
+      const context = createErrorContext('validateField', { field, value });
+      const enhancedError = errorService.handleError(error as Error, context);
+      
+      // Log validation errors but don't throw
+      errorService.logError(enhancedError);
+      
+      return `Validation error for ${String(field)}`;
     }
-
-    return null;
-  }, []);
+  }, [createErrorContext]);
 
   const validate = useCallback((): boolean => {
-    const newErrors: Record<string, string> = {};
-    let isValid = true;
+    try {
+      const newErrors: Record<string, string> = {};
+      let isValid = true;
 
-    Object.keys(formState.fields).forEach(key => {
-      const fieldKey = key as keyof T;
-      const field = formState.fields[fieldKey];
-      const error = validateField(fieldKey, field.value);
-      
-      if (error) {
-        newErrors[key] = error;
-        isValid = false;
+      Object.keys(formState.fields).forEach(key => {
+        const fieldKey = key as keyof T;
+        const field = formState.fields[fieldKey];
+        const error = validateField(fieldKey, field.value);
+        
+        if (error) {
+          newErrors[key] = error;
+          isValid = false;
+        }
+      });
+
+      setFormState(prev => ({
+        ...prev,
+        errors: newErrors,
+        isValid,
+        globalError: null,
+        userMessage: null,
+      }));
+
+      if (!isValid && onValidationError) {
+        onValidationError(newErrors);
       }
-    });
 
-    setFormState(prev => ({
-      ...prev,
-      errors: newErrors,
-      isValid,
-    }));
+      return isValid;
+    } catch (error) {
+      const context = createErrorContext('validate', { fieldsCount: Object.keys(formState.fields).length });
+      const enhancedError = errorService.handleError(error as Error, context);
+      
+      setFormState(prev => ({
+        ...prev,
+        globalError: enhancedError,
+        userMessage: errorService.formatErrorMessage(enhancedError),
+        isValid: false,
+      }));
 
-    if (!isValid && onValidationError) {
-      onValidationError(newErrors);
+      handleError(enhancedError, context);
+      
+      if (onError) {
+        onError(enhancedError);
+      }
+
+      return false;
     }
-
-    return isValid;
-  }, [formState.fields, validateField, onValidationError]);
+  }, [formState.fields, validateField, onValidationError, createErrorContext, handleError, onError]);
 
   // Field operations
   const setValue = useCallback(<K extends keyof T>(field: K, value: T[K]) => {
@@ -346,6 +407,8 @@ export function useFormState<T extends Record<string, any> = Record<string, any>
         ...prev,
         isSubmitting: true,
         submitCount: prev.submitCount + 1,
+        globalError: null,
+        userMessage: null,
       }));
 
       try {
@@ -382,11 +445,25 @@ export function useFormState<T extends Record<string, any> = Record<string, any>
             ...prev,
             fields: newFields,
             isDirty: false,
+            globalError: null,
+            userMessage: null,
           };
         });
       } catch (error) {
-        console.error('Form submission error:', error);
-        // You might want to set a general form error here
+        const context = createErrorContext('handleSubmit', { valuesCount: Object.keys(formState.fields).length });
+        const enhancedError = errorService.handleError(error as Error, context);
+        
+        setFormState(prev => ({
+          ...prev,
+          globalError: enhancedError,
+          userMessage: errorService.formatErrorMessage(enhancedError),
+        }));
+
+        handleError(enhancedError, context);
+        
+        if (onError) {
+          onError(enhancedError);
+        }
       } finally {
         setFormState(prev => ({
           ...prev,
@@ -394,30 +471,46 @@ export function useFormState<T extends Record<string, any> = Record<string, any>
         }));
       }
     };
-  }, [formState.fields, validate, validateOnSubmit]);
+  }, [formState.fields, validate, validateOnSubmit, createErrorContext, handleError, onError]);
 
   const reset = useCallback((newValues?: Partial<T>) => {
-    const resetValues = newValues ? { ...initialValues, ...newValues } : initialValues;
-    
-    const fields = {} as { [K in keyof T]: FormField<T[K]> };
-    Object.keys(resetValues).forEach(key => {
-      const fieldKey = key as keyof T;
-      fields[fieldKey] = {
-        value: resetValues[fieldKey],
-        touched: false,
-        dirty: false,
-      };
-    });
+    try {
+      const resetValues = newValues ? { ...initialValues, ...newValues } : initialValues;
+      
+      const fields = {} as { [K in keyof T]: FormField<T[K]> };
+      Object.keys(resetValues).forEach(key => {
+        const fieldKey = key as keyof T;
+        fields[fieldKey] = {
+          value: resetValues[fieldKey],
+          touched: false,
+          dirty: false,
+        };
+      });
 
-    setFormState({
-      fields,
-      isValid: true,
-      isDirty: false,
-      isSubmitting: false,
-      submitCount: 0,
-      errors: {},
-    });
-  }, [initialValues]);
+      setFormState({
+        fields,
+        isValid: true,
+        isDirty: false,
+        isSubmitting: false,
+        submitCount: 0,
+        errors: {},
+        globalError: null,
+        userMessage: null,
+      });
+
+      // Clear global error handler as well
+      clearGlobalErrorHandler();
+    } catch (error) {
+      const context = createErrorContext('reset', { newValues });
+      const enhancedError = errorService.handleError(error as Error, context);
+      
+      handleError(enhancedError, context);
+      
+      if (onError) {
+        onError(enhancedError);
+      }
+    }
+  }, [initialValues, clearGlobalErrorHandler, createErrorContext, handleError, onError]);
 
   // Utility functions
   const getFieldProps = useCallback(<K extends keyof T>(field: K) => {
@@ -455,13 +548,29 @@ export function useFormState<T extends Record<string, any> = Record<string, any>
     return acc;
   }, {} as Record<keyof T, boolean>);
 
-  const canSubmit = formState.isValid && !formState.isSubmitting;
+  const clearGlobalError = useCallback(() => {
+    setFormState(prev => ({
+      ...prev,
+      globalError: null,
+      userMessage: null,
+    }));
+    clearGlobalErrorHandler();
+  }, [clearGlobalErrorHandler]);
+
+  const canSubmit = formState.isValid && !formState.isSubmitting && !formState.globalError;
 
   return {
     formState,
     values,
     errors,
     touched,
+    
+    // Error handling
+    globalError: formState.globalError,
+    userMessage: formState.userMessage,
+    hasError: !!formState.globalError || Object.keys(formState.errors).length > 0,
+    clearGlobalError,
+    
     setValue,
     setValues,
     setError,

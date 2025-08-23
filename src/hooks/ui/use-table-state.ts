@@ -4,6 +4,9 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
+import { EnhancedError, ErrorContext } from '../../types/entities/error.types';
+import { errorService } from '../../services/shared/error.service';
+import { useErrorHandling } from './use-error-handling';
 
 // Types for table state management
 export interface SortConfig<T = any> {
@@ -57,6 +60,12 @@ export interface UseTableStateResult<T = any> {
   toggleAllSelection: (items: T[], getId: (item: T) => string) => void;
   clearSelection: () => void;
   isSelected: (item: T, getId: (item: T) => string) => boolean;
+  
+  // Error handling
+  error: EnhancedError | null;
+  userMessage: string | null;
+  hasError: boolean;
+  clearError: () => void;
   
   // Combined operations
   getProcessedData: (data: T[]) => T[];
@@ -116,6 +125,8 @@ export interface UseTableStateOptions<T = any> {
   initialFilters?: FilterConfig<T>;
   initialPagination?: Partial<PaginationConfig>;
   defaultPageSize?: number;
+  componentName?: string;
+  onError?: (error: EnhancedError) => void;
 }
 
 /**
@@ -127,7 +138,21 @@ export function useTableState<T = any>(options: UseTableStateOptions<T> = {}): U
     initialFilters = {},
     initialPagination = {},
     defaultPageSize = 10,
+    componentName = 'useTableState',
+    onError,
   } = options;
+
+  // Error handling
+  const { handleError, clearError: clearErrorHandler, error, userMessage } = useErrorHandling({
+    showToast: false,
+    persistError: false,
+  });
+
+  const createErrorContext = useCallback((action: string, metadata?: any): ErrorContext => ({
+    component: componentName,
+    action,
+    metadata
+  }), [componentName]);
 
   // Sorting state
   const [sortConfig, setSortConfig] = useState<SortConfig<T>>(initialSort);
@@ -153,28 +178,57 @@ export function useTableState<T = any>(options: UseTableStateOptions<T> = {}): U
 
   // Sorting functions
   const handleSort = useCallback((key: keyof T) => {
-    setSortConfig(prev => ({
-      key,
-      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
-    }));
-  }, []);
+    try {
+      setSortConfig(prev => ({
+        key,
+        direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+      }));
+    } catch (err) {
+      const context = createErrorContext('handleSort', { sortKey: key });
+      const enhancedError = errorService.handleError(err as Error, context);
+      
+      handleError(enhancedError, context);
+      
+      if (onError) {
+        onError(enhancedError);
+      }
+    }
+  }, [createErrorContext, handleError, onError]);
 
   const getSortedData = useCallback((data: T[]): T[] => {
-    if (!sortConfig.key) return data;
+    try {
+      if (!sortConfig.key) return data;
 
-    return [...data].sort((a, b) => {
-      const aValue = a[sortConfig.key!];
-      const bValue = b[sortConfig.key!];
+      return [...data].sort((a, b) => {
+        const aValue = a[sortConfig.key!];
+        const bValue = b[sortConfig.key!];
 
-      if (aValue === bValue) return 0;
+        if (aValue === bValue) return 0;
 
-      let comparison = 0;
-      if (aValue > bValue) comparison = 1;
-      if (aValue < bValue) comparison = -1;
+        let comparison = 0;
+        if (aValue > bValue) comparison = 1;
+        if (aValue < bValue) comparison = -1;
 
-      return sortConfig.direction === 'desc' ? comparison * -1 : comparison;
-    });
-  }, [sortConfig]);
+        return sortConfig.direction === 'desc' ? comparison * -1 : comparison;
+      });
+    } catch (err) {
+      const context = createErrorContext('getSortedData', { 
+        sortKey: sortConfig.key, 
+        sortDirection: sortConfig.direction,
+        dataLength: data.length 
+      });
+      const enhancedError = errorService.handleError(err as Error, context);
+      
+      handleError(enhancedError, context);
+      
+      if (onError) {
+        onError(enhancedError);
+      }
+      
+      // Return original data on error
+      return data;
+    }
+  }, [sortConfig, createErrorContext, handleError, onError]);
 
   // Filtering functions
   const updateFilter = useCallback((key: string, value: any) => {
@@ -200,29 +254,46 @@ export function useTableState<T = any>(options: UseTableStateOptions<T> = {}): U
   }, []);
 
   const getFilteredData = useCallback((data: T[]): T[] => {
-    return data.filter(item => {
-      return Object.entries(filters).every(([key, value]) => {
-        if (value === null || value === undefined || value === '') return true;
-        
-        const itemValue = (item as any)[key];
-        
-        // Handle different filter types
-        if (typeof value === 'string') {
-          return String(itemValue).toLowerCase().includes(value.toLowerCase());
-        }
-        
-        if (Array.isArray(value)) {
-          return value.includes(itemValue);
-        }
-        
-        if (typeof value === 'object' && value.min !== undefined && value.max !== undefined) {
-          return itemValue >= value.min && itemValue <= value.max;
-        }
-        
-        return itemValue === value;
+    try {
+      return data.filter(item => {
+        return Object.entries(filters).every(([key, value]) => {
+          if (value === null || value === undefined || value === '') return true;
+          
+          const itemValue = (item as any)[key];
+          
+          // Handle different filter types
+          if (typeof value === 'string') {
+            return String(itemValue).toLowerCase().includes(value.toLowerCase());
+          }
+          
+          if (Array.isArray(value)) {
+            return value.includes(itemValue);
+          }
+          
+          if (typeof value === 'object' && value.min !== undefined && value.max !== undefined) {
+            return itemValue >= value.min && itemValue <= value.max;
+          }
+          
+          return itemValue === value;
+        });
       });
-    });
-  }, [filters]);
+    } catch (err) {
+      const context = createErrorContext('getFilteredData', { 
+        filtersCount: Object.keys(filters).length,
+        dataLength: data.length 
+      });
+      const enhancedError = errorService.handleError(err as Error, context);
+      
+      handleError(enhancedError, context);
+      
+      if (onError) {
+        onError(enhancedError);
+      }
+      
+      // Return original data on error
+      return data;
+    }
+  }, [filters, createErrorContext, handleError, onError]);
 
   // Pagination functions
   const setPagination = useCallback((config: Partial<PaginationConfig>) => {
@@ -317,35 +388,70 @@ export function useTableState<T = any>(options: UseTableStateOptions<T> = {}): U
 
   // Combined data processing
   const getProcessedData = useCallback((data: T[]): T[] => {
-    let processedData = data;
-    
-    // Apply filters
-    processedData = getFilteredData(processedData);
-    
-    // Update total count for pagination
-    setPaginationState(prev => ({ ...prev, total: processedData.length }));
-    
-    // Apply sorting
-    processedData = getSortedData(processedData);
-    
-    // Apply pagination
-    processedData = getPaginatedData(processedData);
-    
-    return processedData;
-  }, [getFilteredData, getSortedData, getPaginatedData]);
+    try {
+      let processedData = data;
+      
+      // Apply filters
+      processedData = getFilteredData(processedData);
+      
+      // Update total count for pagination
+      setPaginationState(prev => ({ ...prev, total: processedData.length }));
+      
+      // Apply sorting
+      processedData = getSortedData(processedData);
+      
+      // Apply pagination
+      processedData = getPaginatedData(processedData);
+      
+      return processedData;
+    } catch (err) {
+      const context = createErrorContext('getProcessedData', { 
+        originalDataLength: data.length,
+        hasFilters: Object.keys(filters).length > 0,
+        hasSorting: !!sortConfig.key,
+        currentPage: pagination.page
+      });
+      const enhancedError = errorService.handleError(err as Error, context);
+      
+      handleError(enhancedError, context);
+      
+      if (onError) {
+        onError(enhancedError);
+      }
+      
+      // Return original data on error
+      return data;
+    }
+  }, [getFilteredData, getSortedData, getPaginatedData, createErrorContext, handleError, onError, filters, sortConfig.key, pagination.page]);
 
   // Reset all state
   const reset = useCallback(() => {
-    setSortConfig(initialSort);
-    setFilters(initialFilters);
-    setPaginationState({
-      page: 1,
-      pageSize: defaultPageSize,
-      total: 0,
-      ...initialPagination,
-    });
-    clearSelection();
-  }, [initialSort, initialFilters, initialPagination, defaultPageSize, clearSelection]);
+    try {
+      setSortConfig(initialSort);
+      setFilters(initialFilters);
+      setPaginationState({
+        page: 1,
+        pageSize: defaultPageSize,
+        total: 0,
+        ...initialPagination,
+      });
+      clearSelection();
+      clearErrorHandler();
+    } catch (err) {
+      const context = createErrorContext('reset');
+      const enhancedError = errorService.handleError(err as Error, context);
+      
+      handleError(enhancedError, context);
+      
+      if (onError) {
+        onError(enhancedError);
+      }
+    }
+  }, [initialSort, initialFilters, initialPagination, defaultPageSize, clearSelection, clearErrorHandler, createErrorContext, handleError, onError]);
+
+  const clearError = useCallback(() => {
+    clearErrorHandler();
+  }, [clearErrorHandler]);
 
   return {
     // Sorting
@@ -375,6 +481,12 @@ export function useTableState<T = any>(options: UseTableStateOptions<T> = {}): U
     toggleAllSelection,
     clearSelection,
     isSelected,
+    
+    // Error handling
+    error,
+    userMessage,
+    hasError: !!error,
+    clearError,
     
     // Combined
     getProcessedData,
