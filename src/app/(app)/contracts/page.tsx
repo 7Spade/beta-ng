@@ -1,10 +1,8 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, addDoc, Timestamp, query } from 'firebase/firestore';
-import type { Contract } from '@/types/entities/contract.types';
+import { useState } from 'react';
+import { useContractContext } from '@/context/contracts';
 import { ContractsTable } from '@/components/features/contracts/contracts-table';
 import { AiSummarizerDialog } from '@/components/features/contracts/ai-summarizer-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,126 +12,119 @@ import { CreateContractDialog } from '@/components/features/contracts/create-con
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-
-
-// Helper function to convert Firestore Timestamps to Dates
-const processFirestoreContract = (doc: any): Contract => {
-  const data = doc.data();
-  return {
-    ...data,
-    id: doc.id,
-    startDate: data.startDate?.toDate(),
-    endDate: data.endDate?.toDate(),
-    createdAt: data.createdAt?.toDate() || new Date(),
-    updatedAt: data.updatedAt?.toDate() || new Date(),
-    payments: data.payments?.map((p: any) => ({
-      ...p,
-      requestDate: p.requestDate?.toDate(),
-      paidDate: p.paidDate?.toDate(),
-    })),
-    changeOrders: data.changeOrders?.map((co: any) => ({
-      ...co,
-      date: co.date?.toDate(),
-    })),
-    versions: data.versions?.map((v: any) => ({
-      ...v,
-      date: v.date?.toDate(),
-    })),
-  } as Contract;
-};
-
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, RefreshCw } from 'lucide-react';
+import type { Contract } from '@/types/entities/contract.types';
+import type { CreateContractDto } from '@/types/dto/contract.dto';
 
 export default function ContractsPage() {
-  const [contracts, setContracts] = useState<Contract[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { 
+    contracts, 
+    loading, 
+    error, 
+    userMessage, 
+    createContract, 
+    refreshContracts, 
+    clearError 
+  } = useContractContext();
+  
   const { toast } = useToast();
   const [isCreateDialogOpen, setCreateDialogOpen] = useState(false);
 
-  useEffect(() => {
-    const contractsCollection = collection(db, 'contracts');
-    const q = query(contractsCollection);
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const contractList = querySnapshot.docs.map(processFirestoreContract);
-        setContracts(contractList);
-        setLoading(false);
-    }, (error) => {
-        console.error("獲取合約時發生錯誤：", error);
-        setLoading(false);
-    });
-    
-    return () => unsubscribe();
-  }, []);
-
   const handleAddContract = async (data: Omit<Contract, 'id' | 'payments' | 'changeOrders' | 'versions' | 'createdAt' | 'updatedAt'>) => {
     try {
-        const newContractData = {
-            ...data,
-            startDate: Timestamp.fromDate(data.startDate),
-            endDate: Timestamp.fromDate(data.endDate),
-            createdAt: Timestamp.now(),
-            updatedAt: Timestamp.now(),
-            payments: [],
-            changeOrders: [],
-            versions: [{
-                version: 1,
-                date: Timestamp.now(),
-                changeSummary: "初始版本"
-            }]
-        };
+      // Transform the data to CreateContractDto format
+      const createData: CreateContractDto = {
+        name: data.name,
+        contractor: data.contractor,
+        client: data.client,
+        clientRepresentative: data.clientRepresentative,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        totalValue: data.totalValue,
+        scope: data.scope,
+        customId: data.customId,
+        status: data.status,
+      };
 
-        await addDoc(collection(db, 'contracts'), newContractData);
-        
-        toast({
-            title: "合約已建立",
-            description: `合約 "${data.name}" 已成功新增。`,
-        });
-        setCreateDialogOpen(false);
-        return true;
+      await createContract(createData);
+      
+      toast({
+        title: "合約已建立",
+        description: `合約 "${data.name}" 已成功新增。`,
+      });
+      setCreateDialogOpen(false);
+      return true;
 
     } catch (error) {
-        console.error("新增合約時發生錯誤：", error);
-        toast({
-            title: "錯誤",
-            description: "新增合約失敗，請再試一次。",
-            variant: "destructive",
-        });
-        return false;
+      console.error("新增合約時發生錯誤：", error);
+      toast({
+        title: "錯誤",
+        description: "新增合約失敗，請再試一次。",
+        variant: "destructive",
+      });
+      return false;
     }
   };
 
   return (
     <div className="space-y-6">
-       <div className="flex items-center justify-end gap-2">
-          <AiSummarizerDialog />
-          <Button onClick={() => setCreateDialogOpen(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              新增合約
-          </Button>
-          <CreateContractDialog 
-            isOpen={isCreateDialogOpen} 
-            onOpenChange={setCreateDialogOpen} 
-            onSave={handleAddContract} 
-          />
-        </div>
+      <div className="flex items-center justify-end gap-2">
+        <AiSummarizerDialog />
+        <Button onClick={() => setCreateDialogOpen(true)}>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          新增合約
+        </Button>
+        <CreateContractDialog 
+          isOpen={isCreateDialogOpen} 
+          onOpenChange={setCreateDialogOpen} 
+          onSave={handleAddContract} 
+        />
+      </div>
       
-        <ContractDashboard />
-        {loading ? (
-            <Card>
-                <CardHeader>
-                    <Skeleton className="h-6 w-1/4" />
-                    <Skeleton className="h-4 w-2/4 mt-2" />
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
-                </CardContent>
-            </Card>
-        ) : (
-            <ContractsTable contracts={contracts} />
-        )}
+      <ContractDashboard />
+      
+      {error && userMessage && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>{userMessage}</span>
+            <div className="flex gap-2">
+              <button
+                onClick={clearError}
+                className="text-sm underline hover:no-underline"
+              >
+                關閉
+              </button>
+              <button
+                onClick={refreshContracts}
+                className="text-sm underline hover:no-underline flex items-center gap-1"
+              >
+                <RefreshCw className="h-3 w-3" />
+                重試
+              </button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {loading ? (
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-1/4" />
+            <Skeleton className="h-4 w-2/4 mt-2" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <ContractsTable contracts={contracts} />
+      )}
     </div>
   );
 }

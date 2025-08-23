@@ -9,21 +9,33 @@
  * 
  * @fileoverview 合約儀表板元件
  * @description 顯示合約相關統計數據，包括總數、進行中、已完成以及總價值。
- * 重構後的純 UI 元件，使用自訂 hooks 進行資料獲取和業務邏輯處理。
+ * 重構後的純 UI 元件，使用 ContractContext 進行資料獲取和狀態管理。
  */
 'use client';
 
-import { useContractDashboardStats } from '@/hooks/business/use-contract-stats';
+import { useEffect } from 'react';
+import { useContractContext } from '@/context/contracts';
 import { DashboardStats } from '../dashboard-stats';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 export function ContractDashboard() {
-  const { stats, loading, error, userMessage, refetch, clearError } = useContractDashboardStats({
-    autoFetch: true,
-    refreshInterval: 5 * 60 * 1000, // Refresh every 5 minutes
-  });
+  const { 
+    dashboardStats, 
+    loading, 
+    error, 
+    userMessage, 
+    loadDashboardStats, 
+    clearError 
+  } = useContractContext();
+
+  // Load dashboard stats on mount
+  useEffect(() => {
+    if (!dashboardStats) {
+      loadDashboardStats();
+    }
+  }, [dashboardStats, loadDashboardStats]);
 
   if (loading) {
     return (
@@ -50,7 +62,7 @@ export function ContractDashboard() {
               關閉
             </button>
             <button
-              onClick={refetch}
+              onClick={loadDashboardStats}
               className="text-sm underline hover:no-underline"
             >
               重試
@@ -61,7 +73,7 @@ export function ContractDashboard() {
     );
   }
 
-  if (!stats) {
+  if (!dashboardStats) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="text-center text-muted-foreground">
@@ -73,10 +85,10 @@ export function ContractDashboard() {
 
   // Transform DashboardStats to match the DashboardStats component interface
   const transformedStats = {
-    totalContracts: stats.totalContracts,
-    active: stats.activeContracts,
-    completed: stats.completedContracts,
-    totalValue: stats.totalValue,
+    totalContracts: dashboardStats.totalContracts,
+    active: dashboardStats.activeContracts,
+    completed: dashboardStats.completedContracts,
+    totalValue: dashboardStats.totalValue,
   };
 
   return <DashboardStats stats={transformedStats} />;

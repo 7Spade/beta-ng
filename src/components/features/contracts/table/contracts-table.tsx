@@ -19,7 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { ContractDetailsSheet } from '../contracts-details-sheet';
-import { useContractExport } from '@/hooks/business/use-contract-actions';
+import { useContractContext } from '@/context/contracts';
 import { useTableState } from '@/hooks/ui/use-table-state';
 import { ContractsRow } from './contracts-row';
 
@@ -31,14 +31,16 @@ export function ContractsTable({ contracts: initialContracts }: ContractsTablePr
   // UI state management using hooks
   const [selectedContract, setSelectedContract] = React.useState<Contract | null>(null);
   const [isSheetOpen, setSheetOpen] = React.useState(false);
+  const [exporting, setExporting] = React.useState(false);
+  const [exportError, setExportError] = React.useState<string | null>(null);
   
   // Table state management
   const tableState = useTableState<Contract>({
     defaultPageSize: 10,
   });
   
-  // Export functionality using business logic hook
-  const { exportToCSV, exporting, exportError } = useContractExport();
+  // Use contract context for export functionality
+  const { exportContracts } = useContractContext();
 
   const handleViewDetails = (contract: Contract) => {
     setSelectedContract(contract);
@@ -54,7 +56,10 @@ export function ContractsTable({ contracts: initialContracts }: ContractsTablePr
 
   const handleExport = async () => {
     try {
-      await exportToCSV(initialContracts, {
+      setExporting(true);
+      setExportError(null);
+      
+      await exportContracts(initialContracts, {
         format: 'csv',
         filename: 'contracts_export.csv',
         includePayments: false,
@@ -62,6 +67,9 @@ export function ContractsTable({ contracts: initialContracts }: ContractsTablePr
       });
     } catch (error) {
       console.error('Export failed:', error);
+      setExportError(error instanceof Error ? error.message : 'Export failed');
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -89,7 +97,7 @@ export function ContractsTable({ contracts: initialContracts }: ContractsTablePr
         <CardContent>
           {exportError && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
-              匯出失敗: {exportError.message}
+              匯出失敗: {exportError}
             </div>
           )}
           <Table>
