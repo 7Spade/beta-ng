@@ -433,23 +433,30 @@
 │          README.md
 │          repository.types.ts
 │
-└─utils
-    │  index.ts
-    │  README.md
-    │
-    ├─formatting
-    │      currency.formatter.ts
-    │      date.formatter.ts
-    │      index.ts
-    │      README.md
-    │
-    ├─transformation
-    │      firebase.transformer.ts
-    │      index.ts
-    │      README.md
-    │
-    └─validation
-            common.validation.ts
-            contract.validation.ts
-            index.ts
-            README.md
+├─utils
+│  │  index.ts
+│  │  README.md
+│  │
+│  ├─formatting
+│  │      currency.formatter.ts
+│  │      date.formatter.ts
+│  │      index.ts
+│  │      README.md
+│  │
+│  ├─transformation
+│  │      firebase.transformer.ts
+│  │      index.ts
+│  │      README.md
+│  │
+│  └─validation
+│          common.validation.ts
+│          contract.validation.ts
+│          index.ts
+│          README.md
+│
+└─__tests__
+        contract-functionality.test.tsx
+        contract-integration.test.tsx
+        final-functionality.test.ts
+        performance.test.ts
+        test-summary.md

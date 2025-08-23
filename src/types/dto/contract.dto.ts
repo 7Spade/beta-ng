@@ -25,6 +25,7 @@ export interface CreateContractDto extends BaseDto {
   status?: ContractStatus; // Optional, defaults to "啟用中"
   payments?: Payment[];
   changeOrders?: ChangeOrder[];
+  versions?: ContractVersion[];
 }
 
 // Update contract DTO - partial data for updating existing contract

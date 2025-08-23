@@ -568,3 +568,6 @@ export class ContractRepository extends FirebaseRepository<Contract> implements 
     return chunks;
   }
 }
+
+// Export singleton instance
+export const contractRepository = new ContractRepository();
