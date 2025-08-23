@@ -13,7 +13,7 @@
  */
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useContractContext } from '@/context/contracts';
 import { DashboardStats } from '../dashboard-stats';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,6 +29,19 @@ export function ContractDashboard() {
     loadDashboardStats, 
     clearError 
   } = useContractContext();
+
+  // Transform DashboardStats to match the DashboardStats component interface with memoization
+  // This hook must be called at the top level, before any conditional returns
+  const transformedStats = useMemo(() => {
+    if (!dashboardStats) return null;
+    
+    return {
+      totalContracts: dashboardStats.totalContracts,
+      active: dashboardStats.activeContracts,
+      completed: dashboardStats.completedContracts,
+      totalValue: dashboardStats.totalValue,
+    };
+  }, [dashboardStats]);
 
   // Load dashboard stats on mount
   useEffect(() => {
@@ -73,7 +86,7 @@ export function ContractDashboard() {
     );
   }
 
-  if (!dashboardStats) {
+  if (!dashboardStats || !transformedStats) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="text-center text-muted-foreground">
@@ -82,14 +95,6 @@ export function ContractDashboard() {
       </div>
     );
   }
-
-  // Transform DashboardStats to match the DashboardStats component interface with memoization
-  const transformedStats = React.useMemo(() => ({
-    totalContracts: dashboardStats.totalContracts,
-    active: dashboardStats.activeContracts,
-    completed: dashboardStats.completedContracts,
-    totalValue: dashboardStats.totalValue,
-  }), [dashboardStats]);
 
   return <DashboardStats stats={transformedStats} />;
 }
