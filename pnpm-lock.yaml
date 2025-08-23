@@ -168,6 +168,9 @@ importers:
       '@types/react-dom':
         specifier: ^18
         version: 18.3.7(@types/react@18.3.24)
+      '@types/request':
+        specifier: ^2.48.13
+        version: 2.48.13
       genkit-cli:
         specifier: ^1.17.0
         version: 1.17.0(@types/node@20.19.11)

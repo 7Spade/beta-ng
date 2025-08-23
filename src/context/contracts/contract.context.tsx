@@ -407,26 +407,36 @@ export function ContractProvider({
     dispatch({ type: 'RESET_STATE' });
   }, []);
 
-  // Computed properties
-  const hasContracts = state.contracts.length > 0;
-  const hasError = !!state.error;
-  const activeContracts = state.contracts.filter(contract => contract.status === '啟用中');
-  const completedContracts = state.contracts.filter(contract => contract.status === '已完成');
+  // Computed properties with memoization for performance
+  const hasContracts = React.useMemo(() => state.contracts.length > 0, [state.contracts.length]);
+  const hasError = React.useMemo(() => !!state.error, [state.error]);
   
-  // Apply filters to get filtered contracts
-  const filteredContracts = state.contracts.filter(contract => {
-    const { status, client, contractor, startDate, endDate, minValue, maxValue } = state.filters;
-    
-    if (status && contract.status !== status) return false;
-    if (client && !contract.client.toLowerCase().includes(client.toLowerCase())) return false;
-    if (contractor && !contract.contractor.toLowerCase().includes(contractor.toLowerCase())) return false;
-    if (startDate && contract.startDate < startDate) return false;
-    if (endDate && contract.endDate > endDate) return false;
-    if (minValue && contract.totalValue < minValue) return false;
-    if (maxValue && contract.totalValue > maxValue) return false;
-    
-    return true;
-  });
+  const activeContracts = React.useMemo(() => 
+    state.contracts.filter(contract => contract.status === '啟用中'), 
+    [state.contracts]
+  );
+  
+  const completedContracts = React.useMemo(() => 
+    state.contracts.filter(contract => contract.status === '已完成'), 
+    [state.contracts]
+  );
+  
+  // Apply filters to get filtered contracts with memoization
+  const filteredContracts = React.useMemo(() => {
+    return state.contracts.filter(contract => {
+      const { status, client, contractor, startDate, endDate, minValue, maxValue } = state.filters;
+      
+      if (status && contract.status !== status) return false;
+      if (client && !contract.client.toLowerCase().includes(client.toLowerCase())) return false;
+      if (contractor && !contract.contractor.toLowerCase().includes(contractor.toLowerCase())) return false;
+      if (startDate && contract.startDate < startDate) return false;
+      if (endDate && contract.endDate > endDate) return false;
+      if (minValue && contract.totalValue < minValue) return false;
+      if (maxValue && contract.totalValue > maxValue) return false;
+      
+      return true;
+    });
+  }, [state.contracts, state.filters]);
 
   // Auto-load contracts on mount
   React.useEffect(() => {

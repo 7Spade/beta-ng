@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { Contract } from '@/lib/types';
+import type { Contract } from '@/types/entities/contract.types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { formatDate } from '@/lib/utils';
 

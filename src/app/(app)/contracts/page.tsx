@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useContractContext } from '@/context/contracts';
-import { ContractsTable } from '@/components/features/contracts/contracts-table';
+import { ContractsTable } from '@/components/features/contracts/table';
 import { AiSummarizerDialog } from '@/components/features/contracts/ai-summarizer-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';

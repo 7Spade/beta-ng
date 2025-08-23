@@ -42,19 +42,19 @@ export function ContractsTable({ contracts: initialContracts }: ContractsTablePr
   // Use contract context for export functionality
   const { exportContracts } = useContractContext();
 
-  const handleViewDetails = (contract: Contract) => {
+  const handleViewDetails = React.useCallback((contract: Contract) => {
     setSelectedContract(contract);
     setSheetOpen(true);
-  };
+  }, []);
   
-  const handleSheetOpenChange = (open: boolean) => {
+  const handleSheetOpenChange = React.useCallback((open: boolean) => {
     setSheetOpen(open);
     if (!open) {
       setSelectedContract(null);
     }
-  };
+  }, []);
 
-  const handleExport = async () => {
+  const handleExport = React.useCallback(async () => {
     try {
       setExporting(true);
       setExportError(null);
@@ -71,14 +71,17 @@ export function ContractsTable({ contracts: initialContracts }: ContractsTablePr
     } finally {
       setExporting(false);
     }
-  };
+  }, [exportContracts, initialContracts]);
 
   // Update total count and process contracts through table state management
   React.useEffect(() => {
     tableState.updateTotal(initialContracts);
   }, [initialContracts, tableState]);
   
-  const processedContracts = tableState.getProcessedData(initialContracts);
+  const processedContracts = React.useMemo(() => 
+    tableState.getProcessedData(initialContracts), 
+    [tableState, initialContracts]
+  );
 
   return (
     <>

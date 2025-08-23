@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { Contract, Payment } from '@/lib/types';
+import type { Contract, Payment } from '@/types/entities/contract.types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';

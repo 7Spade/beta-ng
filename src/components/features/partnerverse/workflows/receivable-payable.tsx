@@ -5,7 +5,8 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, addDoc, updateDoc, Timestamp, onSnapshot, query, where, getDoc } from 'firebase/firestore';
-import type { Partner, FinancialDocument, ReceivablePayableType, Contract, Transaction } from '@/lib/types';
+import type { Partner, FinancialDocument, ReceivablePayableType, Transaction } from '@/lib/types';
+import type { Contract } from '@/types/entities/contract.types';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

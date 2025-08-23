@@ -13,7 +13,7 @@
  */
 'use client';
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useContractContext } from '@/context/contracts';
 import { DashboardStats } from '../dashboard-stats';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -83,13 +83,13 @@ export function ContractDashboard() {
     );
   }
 
-  // Transform DashboardStats to match the DashboardStats component interface
-  const transformedStats = {
+  // Transform DashboardStats to match the DashboardStats component interface with memoization
+  const transformedStats = React.useMemo(() => ({
     totalContracts: dashboardStats.totalContracts,
     active: dashboardStats.activeContracts,
     completed: dashboardStats.completedContracts,
     totalValue: dashboardStats.totalValue,
-  };
+  }), [dashboardStats]);
 
   return <DashboardStats stats={transformedStats} />;
 }

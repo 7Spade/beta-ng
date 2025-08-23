@@ -23,7 +23,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import type { Contract } from '@/lib/types';
+import type { Contract } from '@/types/entities/contract.types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 
 const contractSchema = z.object({
@@ -47,7 +47,7 @@ type ContractFormValues = z.infer<typeof contractSchema>;
 interface CreateContractDialogProps {
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
-    onSave: (data: Omit<Contract, 'id' | 'payments' | 'changeOrders' | 'versions'>) => Promise<boolean>;
+    onSave: (data: Omit<Contract, 'id' | 'payments' | 'changeOrders' | 'versions' | 'createdAt' | 'updatedAt'>) => Promise<boolean>;
 }
 
 export function CreateContractDialog({ isOpen, onOpenChange, onSave }: CreateContractDialogProps) {

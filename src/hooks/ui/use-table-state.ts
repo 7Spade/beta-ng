@@ -69,6 +69,7 @@ export interface UseTableStateResult<T = any> {
   
   // Combined operations
   getProcessedData: (data: T[]) => T[];
+  updateTotal: (data: T[]) => void;
   reset: () => void;
 }
 

@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { Contract } from '@/lib/types';
+import type { Contract } from '@/types/entities/contract.types';
 import {
   Sheet,
   SheetContent,
