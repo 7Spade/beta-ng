@@ -69,6 +69,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/request": "^2.48.13",
     "genkit-cli": "^1.17.0",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
