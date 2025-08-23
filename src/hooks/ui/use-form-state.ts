@@ -43,7 +43,7 @@ export interface UseFormStateResult<T extends Record<string, any> = Record<strin
   formState: FormState<T>;
   values: T;
   errors: Record<string, string>;
-  touched: Record<string, boolean>;
+  touched: Record<keyof T, boolean>;
   
   // Field operations
   setValue: <K extends keyof T>(field: K, value: T[K]) => void;
@@ -494,11 +494,12 @@ export function useFormValidation<T extends Record<string, any> = Record<string,
   validationSchema: ValidationSchema<T>
 ): UseFormValidationResult<T> {
   const validateField = useCallback((field: keyof T, value: T[keyof T]): string | null => {
-    if (!validationSchema[field]) return null;
+    const fieldRules = validationSchema[field as keyof T];
+    if (!fieldRules) return null;
 
-    const rules = Array.isArray(validationSchema[field]) 
-      ? validationSchema[field] as ValidationRule<T[keyof T]>[] 
-      : [validationSchema[field] as ValidationRule<T[keyof T]>];
+    const rules = Array.isArray(fieldRules) 
+      ? fieldRules as ValidationRule<T[keyof T]>[] 
+      : [fieldRules as ValidationRule<T[keyof T]>];
 
     for (const rule of rules) {
       if (rule.required && (value === null || value === undefined || value === '')) {

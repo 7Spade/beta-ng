@@ -287,7 +287,7 @@ export function useTableState<T = any>(options: UseTableStateOptions<T> = {}): U
         };
       } else {
         // Select all current items
-        const newSelectedIds = new Set([...prev.selectedIds, ...allIds]);
+        const newSelectedIds = new Set(Array.from(prev.selectedIds).concat(Array.from(allIds)));
         const existingIds = new Set(prev.selectedItems.map(getId));
         const newItems = items.filter(item => !existingIds.has(getId(item)));
         const newSelectedItems = [...prev.selectedItems, ...newItems];
@@ -622,7 +622,7 @@ export function useTableSelection<T = any>(): UseTableSelectionResult<T> {
           isIndeterminate: newSelectedIds.size > 0,
         };
       } else {
-        const newSelectedIds = new Set([...prev.selectedIds, ...allIds]);
+        const newSelectedIds = new Set(Array.from(prev.selectedIds).concat(Array.from(allIds)));
         const existingIds = new Set(prev.selectedItems.map(getId));
         const newItems = items.filter(item => !existingIds.has(getId(item)));
         const newSelectedItems = [...prev.selectedItems, ...newItems];
@@ -640,7 +640,7 @@ export function useTableSelection<T = any>(): UseTableSelectionResult<T> {
   const selectItems = useCallback((items: T[], getId: (item: T) => string) => {
     setSelection(prev => {
       const newIds = items.map(getId);
-      const newSelectedIds = new Set([...prev.selectedIds, ...newIds]);
+      const newSelectedIds = new Set(Array.from(prev.selectedIds).concat(newIds));
       const existingIds = new Set(prev.selectedItems.map(getId));
       const newItems = items.filter(item => !existingIds.has(getId(item)));
       const newSelectedItems = [...prev.selectedItems, ...newItems];
