@@ -1,5 +1,7 @@
-// Service exports
+/**
+ * Services index
+ * Exports all service modules
+ */
+
 export * from './contracts';
-export * from './projects';
-export * from './partners';
 export * from './shared';
