@@ -8,12 +8,15 @@ import { Contract } from '../../types/entities/contract.types';
 import { CreateContractDto, UpdateContractDto } from '../../types/dto/contract.dto';
 import { ExportOptions, ValidationResult } from '../../types/services/contract.service.types';
 import { ContractService } from '../../services/contracts/contract.service';
+import { errorService, validationService } from '../../services/shared';
+import { EnhancedError, ErrorContext } from '../../types/entities/error.types';
 
 // Hook return types
 export interface UseContractActionsResult {
   // State
   loading: boolean;
-  error: Error | null;
+  error: EnhancedError | null;
+  userMessage: string | null;
   
   // Actions
   createContract: (data: CreateContractDto) => Promise<Contract>;
@@ -37,7 +40,8 @@ export interface UseContractValidationResult {
 
 export interface UseContractExportResult {
   exporting: boolean;
-  exportError: Error | null;
+  exportError: EnhancedError | null;
+  exportUserMessage: string | null;
   exportToCSV: (contracts: Contract[], options?: Partial<ExportOptions>) => Promise<void>;
   exportToExcel: (contracts: Contract[], options?: Partial<ExportOptions>) => Promise<void>;
   exportToPDF: (contracts: Contract[], options?: Partial<ExportOptions>) => Promise<void>;
@@ -46,7 +50,8 @@ export interface UseContractExportResult {
 
 export interface UseContractBatchActionsResult {
   batchLoading: boolean;
-  batchError: Error | null;
+  batchError: EnhancedError | null;
+  batchUserMessage: string | null;
   batchUpdateStatus: (contractIds: string[], status: Contract['status']) => Promise<void>;
   batchDelete: (contractIds: string[]) => Promise<void>;
   batchExport: (contractIds: string[], options: ExportOptions) => Promise<void>;
@@ -66,17 +71,28 @@ export interface UseContractActionsOptions {
 export function useContractActions(options: UseContractActionsOptions = {}): UseContractActionsResult {
   const { onSuccess, onError, autoReset = true } = options;
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<EnhancedError | null>(null);
+  const [userMessage, setUserMessage] = useState<string | null>(null);
   
   const contractService = useRef(new ContractService()).current;
 
+  const createErrorContext = useCallback((action: string, metadata?: any): ErrorContext => ({
+    component: 'useContractActions',
+    action,
+    metadata
+  }), []);
+
   const handleAction = useCallback(async <T>(
     action: string,
-    operation: () => Promise<T>
+    operation: () => Promise<T>,
+    metadata?: any
   ): Promise<T> => {
     try {
       setLoading(true);
-      if (autoReset) setError(null);
+      if (autoReset) {
+        setError(null);
+        setUserMessage(null);
+      }
       
       const result = await operation();
       
@@ -86,55 +102,101 @@ export function useContractActions(options: UseContractActionsOptions = {}): Use
       
       return result;
     } catch (err) {
-      const error = err instanceof Error ? err : new Error(`Failed to ${action}`);
-      setError(error);
+      const context = createErrorContext(action, metadata);
+      const enhancedError = errorService.handleError(err as Error, context);
+      
+      setError(enhancedError);
+      setUserMessage(errorService.formatErrorMessage(enhancedError));
+      
+      // Log the error
+      errorService.logError(enhancedError);
       
       if (onError) {
-        onError(action, error);
+        onError(action, enhancedError);
       }
       
-      throw error;
+      throw enhancedError;
     } finally {
       setLoading(false);
     }
-  }, [onSuccess, onError, autoReset]);
+  }, [onSuccess, onError, autoReset, createErrorContext]);
 
   const createContract = useCallback(async (data: CreateContractDto): Promise<Contract> => {
-    return handleAction('create contract', () => contractService.createContract(data));
-  }, [contractService, handleAction]);
+    // Validate before creating
+    const context = createErrorContext('create contract', { contractData: data });
+    const validationResult = validationService.validateContractForCreation(data, context);
+    
+    if (!validationResult.isValid) {
+      const validationError = errorService.createValidationError(
+        'contract_data',
+        data,
+        validationResult.errors.map(e => e.message).join(', '),
+        context
+      );
+      throw validationError;
+    }
+    
+    return handleAction('create contract', () => contractService.createContract(data), { contractData: data });
+  }, [contractService, handleAction, createErrorContext]);
 
   const updateContract = useCallback(async (id: string, updates: UpdateContractDto): Promise<Contract> => {
-    return handleAction('update contract', () => contractService.updateContract(id, updates));
-  }, [contractService, handleAction]);
+    // Validate before updating
+    const context = createErrorContext('update contract', { contractId: id, updates });
+    const validationResult = validationService.validateContractForUpdate(updates, context);
+    
+    if (!validationResult.isValid) {
+      const validationError = errorService.createValidationError(
+        'contract_updates',
+        updates,
+        validationResult.errors.map(e => e.message).join(', '),
+        context
+      );
+      throw validationError;
+    }
+    
+    return handleAction('update contract', () => contractService.updateContract(id, updates), { contractId: id, updates });
+  }, [contractService, handleAction, createErrorContext]);
 
   const deleteContract = useCallback(async (id: string): Promise<void> => {
-    return handleAction('delete contract', () => contractService.deleteContract(id));
+    return handleAction('delete contract', () => contractService.deleteContract(id), { contractId: id });
   }, [contractService, handleAction]);
 
   const updateContractStatus = useCallback(async (id: string, status: Contract['status']): Promise<Contract> => {
-    return handleAction('update contract status', () => contractService.updateContractStatus(id, status));
+    return handleAction('update contract status', () => contractService.updateContractStatus(id, status), { contractId: id, newStatus: status });
   }, [contractService, handleAction]);
 
   const validateContract = useCallback((contract: Partial<Contract>): ValidationResult => {
-    return contractService.validateContract(contract);
-  }, [contractService]);
+    const context = createErrorContext('validate contract', { contract });
+    
+    // Use validation service for enhanced validation
+    if ('id' in contract && contract.id) {
+      // This is an update validation
+      return validationService.validateContractForUpdate(contract as UpdateContractDto, context);
+    } else {
+      // This is a creation validation
+      return validationService.validateContractForCreation(contract as CreateContractDto, context);
+    }
+  }, [createErrorContext]);
 
   const exportContracts = useCallback(async (contracts: Contract[], options: ExportOptions): Promise<void> => {
-    return handleAction('export contracts', () => contractService.exportContracts(contracts, options));
+    return handleAction('export contracts', () => contractService.exportContracts(contracts, options), { contractCount: contracts.length, options });
   }, [contractService, handleAction]);
 
   const clearError = useCallback(() => {
     setError(null);
+    setUserMessage(null);
   }, []);
 
   const reset = useCallback(() => {
     setLoading(false);
     setError(null);
+    setUserMessage(null);
   }, []);
 
   return {
     loading,
     error,
+    userMessage,
     createContract,
     updateContract,
     deleteContract,
@@ -204,7 +266,7 @@ export function useContractValidation(): UseContractValidationResult {
  */
 export function useContractExport(): UseContractExportResult {
   const [exporting, setExporting] = useState(false);
-  const [exportError, setExportError] = useState<Error | null>(null);
+  const [exportError, setExportError] = useState<EnhancedError | null>(null);
   
   const contractService = useRef(new ContractService()).current;
 
@@ -226,9 +288,9 @@ export function useContractExport(): UseContractExportResult {
       
       await contractService.exportContracts(contracts, exportOptions);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error(`Failed to export contracts as ${format}`);
-      setExportError(error);
-      throw error;
+      const enhancedError = errorService.handleError(err as Error);
+      setExportError(enhancedError);
+      throw enhancedError;
     } finally {
       setExporting(false);
     }
@@ -265,7 +327,7 @@ export function useContractExport(): UseContractExportResult {
  */
 export function useContractBatchActions(): UseContractBatchActionsResult {
   const [batchLoading, setBatchLoading] = useState(false);
-  const [batchError, setBatchError] = useState<Error | null>(null);
+  const [batchError, setBatchError] = useState<EnhancedError | null>(null);
   
   const contractService = useRef(new ContractService()).current;
 
@@ -280,9 +342,9 @@ export function useContractBatchActions(): UseContractBatchActionsResult {
       const result = await operation();
       return result;
     } catch (err) {
-      const error = err instanceof Error ? err : new Error(`Failed to ${action}`);
-      setBatchError(error);
-      throw error;
+      const enhancedError = errorService.handleError(err as Error);
+      setBatchError(enhancedError);
+      throw enhancedError;
     } finally {
       setBatchLoading(false);
     }

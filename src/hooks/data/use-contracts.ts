@@ -7,14 +7,18 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Contract, ContractFilters, ContractStats } from '../../types/entities/contract.types';
 import { ContractRepository } from '../../repositories/contracts/contract.repository';
 import { PaginationOptions } from '../../types/entities/shared.types';
+import { errorService } from '../../services/shared/error.service';
+import { EnhancedError, ErrorContext } from '../../types/entities/error.types';
 
 // Hook return types
 export interface UseContractsResult {
   contracts: Contract[];
   loading: boolean;
-  error: Error | null;
+  error: EnhancedError | null;
+  userMessage: string | null;
   refetch: () => Promise<void>;
   refresh: () => Promise<void>;
+  clearError: () => void;
 }
 
 export interface UseContractsWithFiltersResult extends UseContractsResult {
@@ -26,22 +30,28 @@ export interface UseContractsWithFiltersResult extends UseContractsResult {
 export interface UseContractResult {
   contract: Contract | null;
   loading: boolean;
-  error: Error | null;
+  error: EnhancedError | null;
+  userMessage: string | null;
   refetch: () => Promise<void>;
+  clearError: () => void;
 }
 
 export interface UseContractStatsResult {
   stats: ContractStats | null;
   loading: boolean;
-  error: Error | null;
+  error: EnhancedError | null;
+  userMessage: string | null;
   refetch: () => Promise<void>;
+  clearError: () => void;
 }
 
 export interface UseContractSubscriptionResult {
   contracts: Contract[];
   loading: boolean;
-  error: Error | null;
+  error: EnhancedError | null;
+  userMessage: string | null;
   unsubscribe: () => void;
+  clearError: () => void;
 }
 
 // Hook options
@@ -64,22 +74,30 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRes
   const { autoFetch = true, cacheKey } = options;
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  
+  const [error, setError] = useState<EnhancedError | null>(null);
+  const [userMessage, setUserMessage] = useState<string | null>(null);
+
   const contractRepository = useRef(new ContractRepository()).current;
   const cache = useRef(new Map<string, { data: Contract[]; timestamp: number }>()).current;
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+  const createErrorContext = useCallback((): ErrorContext => ({
+    component: 'useContracts',
+    action: 'fetchContracts',
+    metadata: { cacheKey, autoFetch }
+  }), [cacheKey, autoFetch]);
 
   const fetchContracts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
+      setUserMessage(null);
 
       // Check cache first
       const key = cacheKey || 'all-contracts';
       const cached = cache.get(key);
       const now = Date.now();
-      
+
       if (cached && (now - cached.timestamp) < CACHE_DURATION) {
         setContracts(cached.data);
         setLoading(false);
@@ -87,18 +105,23 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRes
       }
 
       const result = await contractRepository.findAll();
-      
+
       // Update cache
       cache.set(key, { data: result, timestamp: now });
       setContracts(result);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to fetch contracts');
-      setError(error);
-      console.error('Error fetching contracts:', error);
+      const context = createErrorContext();
+      const enhancedError = errorService.handleError(err as Error, context);
+
+      setError(enhancedError);
+      setUserMessage(errorService.formatErrorMessage(enhancedError));
+
+      // Log the error
+      errorService.logError(enhancedError);
     } finally {
       setLoading(false);
     }
-  }, [contractRepository, cache, cacheKey]);
+  }, [contractRepository, cache, cacheKey, createErrorContext]);
 
   const refresh = useCallback(async () => {
     // Clear cache and refetch
@@ -110,6 +133,11 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRes
     await fetchContracts();
   }, [fetchContracts, cache, cacheKey]);
 
+  const clearError = useCallback(() => {
+    setError(null);
+    setUserMessage(null);
+  }, []);
+
   useEffect(() => {
     if (autoFetch) {
       fetchContracts();
@@ -120,8 +148,10 @@ export function useContracts(options: UseContractsOptions = {}): UseContractsRes
     contracts,
     loading,
     error,
+    userMessage,
     refetch: fetchContracts,
     refresh,
+    clearError,
   };
 }
 
@@ -135,7 +165,7 @@ export function useContractsWithFilters(options: UseContractsOptions = {}): UseC
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [hasMore, setHasMore] = useState(false);
-  
+
   const contractRepository = useRef(new ContractRepository()).current;
   const cache = useRef(new Map<string, { data: Contract[]; total: number; timestamp: number }>()).current;
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
@@ -149,7 +179,7 @@ export function useContractsWithFilters(options: UseContractsOptions = {}): UseC
       const key = cacheKey || `contracts-${JSON.stringify({ filters, pagination })}`;
       const cached = cache.get(key);
       const now = Date.now();
-      
+
       if (!append && cached && (now - cached.timestamp) < CACHE_DURATION) {
         setContracts(cached.data);
         setTotal(cached.total);
@@ -158,10 +188,10 @@ export function useContractsWithFilters(options: UseContractsOptions = {}): UseC
         return;
       }
 
-      const result = filters 
+      const result = filters
         ? await contractRepository.findContracts({ filters, pagination })
         : await contractRepository.findAll().then(contracts => ({ contracts, total: contracts.length }));
-      
+
       if (append) {
         setContracts(prev => [...prev, ...result.contracts]);
       } else {
@@ -169,7 +199,7 @@ export function useContractsWithFilters(options: UseContractsOptions = {}): UseC
         // Update cache only for non-append operations
         cache.set(key, { data: result.contracts, total: result.total, timestamp: now });
       }
-      
+
       setTotal(result.total);
       setHasMore(result.contracts.length < result.total);
     } catch (err) {
@@ -183,7 +213,7 @@ export function useContractsWithFilters(options: UseContractsOptions = {}): UseC
 
   const loadMore = useCallback(async () => {
     if (!hasMore || loading) return;
-    
+
     const nextPagination = pagination ? {
       ...pagination,
       limit: pagination.limit || 10,
@@ -229,26 +259,36 @@ export function useContract(id: string | null, options: { autoFetch?: boolean } 
   const { autoFetch = true } = options;
   const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  
+  const [error, setError] = useState<EnhancedError | null>(null);
+  const [userMessage, setUserMessage] = useState<string | null>(null);
+
   const contractRepository = useRef(new ContractRepository()).current;
   const cache = useRef(new Map<string, { data: Contract; timestamp: number }>()).current;
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+  const createErrorContext = useCallback((): ErrorContext => ({
+    component: 'useContract',
+    action: 'fetchContract',
+    metadata: { contractId: id, autoFetch }
+  }), [id, autoFetch]);
+
   const fetchContract = useCallback(async () => {
     if (!id) {
       setContract(null);
+      setError(null);
+      setUserMessage(null);
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
+      setUserMessage(null);
 
       // Check cache first
       const cached = cache.get(id);
       const now = Date.now();
-      
+
       if (cached && (now - cached.timestamp) < CACHE_DURATION) {
         setContract(cached.data);
         setLoading(false);
@@ -256,22 +296,41 @@ export function useContract(id: string | null, options: { autoFetch?: boolean } 
       }
 
       const result = await contractRepository.findById(id);
-      
+
       if (result) {
         // Update cache
         cache.set(id, { data: result, timestamp: now });
         setContract(result);
       } else {
+        // Handle not found case
+        const context = createErrorContext();
+        const notFoundError = errorService.createNotFoundError('合約', id, context);
+
+        setError(notFoundError);
+        setUserMessage(errorService.formatErrorMessage(notFoundError));
         setContract(null);
+
+        // Log the error
+        errorService.logError(notFoundError);
       }
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to fetch contract');
-      setError(error);
-      console.error('Error fetching contract:', error);
+      const context = createErrorContext();
+      const enhancedError = errorService.handleError(err as Error, context);
+
+      setError(enhancedError);
+      setUserMessage(errorService.formatErrorMessage(enhancedError));
+
+      // Log the error
+      errorService.logError(enhancedError);
     } finally {
       setLoading(false);
     }
-  }, [id, contractRepository, cache]);
+  }, [id, contractRepository, cache, createErrorContext]);
+
+  const clearError = useCallback(() => {
+    setError(null);
+    setUserMessage(null);
+  }, []);
 
   useEffect(() => {
     if (autoFetch && id) {
@@ -279,6 +338,7 @@ export function useContract(id: string | null, options: { autoFetch?: boolean } 
     } else if (!id) {
       setContract(null);
       setError(null);
+      setUserMessage(null);
     }
   }, [autoFetch, id, fetchContract]);
 
@@ -286,7 +346,9 @@ export function useContract(id: string | null, options: { autoFetch?: boolean } 
     contract,
     loading,
     error,
+    userMessage,
     refetch: fetchContract,
+    clearError,
   };
 }
 
@@ -298,7 +360,7 @@ export function useContractStats(options: { autoFetch?: boolean; cacheKey?: stri
   const [stats, setStats] = useState<ContractStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  
+
   const contractRepository = useRef(new ContractRepository()).current;
   const cache = useRef(new Map<string, { data: ContractStats; timestamp: number }>()).current;
   const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes (stats change more frequently)
@@ -312,7 +374,7 @@ export function useContractStats(options: { autoFetch?: boolean; cacheKey?: stri
       const key = cacheKey || 'contract-stats';
       const cached = cache.get(key);
       const now = Date.now();
-      
+
       if (cached && (now - cached.timestamp) < CACHE_DURATION) {
         setStats(cached.data);
         setLoading(false);
@@ -320,7 +382,7 @@ export function useContractStats(options: { autoFetch?: boolean; cacheKey?: stri
       }
 
       const result = await contractRepository.getContractStats();
-      
+
       // Update cache
       cache.set(key, { data: result, timestamp: now });
       setStats(result);
@@ -355,7 +417,7 @@ export function useContractSubscription(options: UseContractSubscriptionOptions 
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  
+
   const contractRepository = useRef(new ContractRepository()).current;
   const unsubscribeRef = useRef<(() => void) | null>(null);
 
@@ -418,7 +480,7 @@ export function useExpiringContracts(daysAhead: number = 30): UseContractsResult
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  
+
   const contractRepository = useRef(new ContractRepository()).current;
 
   const fetchExpiringContracts = useCallback(async () => {

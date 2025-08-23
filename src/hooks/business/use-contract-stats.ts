@@ -7,14 +7,18 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Contract } from '../../types/entities/contract.types';
 import { DashboardStats } from '../../types/services/contract.service.types';
 import { ContractStatsService } from '../../services/contracts/contract-stats.service';
+import { errorService } from '../../services/shared/error.service';
+import { EnhancedError, ErrorContext } from '../../types/entities/error.types';
 
 // Hook return types
 export interface UseContractDashboardStatsResult {
   stats: DashboardStats | null;
   loading: boolean;
-  error: Error | null;
+  error: EnhancedError | null;
+  userMessage: string | null;
   refetch: () => Promise<void>;
   refresh: () => Promise<void>;
+  clearError: () => void;
 }
 
 export interface UseContractValueResult {
@@ -37,9 +41,11 @@ export interface UseContractAnalyticsResult {
 export interface UseMonthlyRevenueResult {
   monthlyRevenue: number;
   loading: boolean;
-  error: Error | null;
+  error: EnhancedError | null;
+  userMessage: string | null;
   calculateRevenue: (contracts: Contract[]) => number;
   refetch: () => Promise<void>;
+  clearError: () => void;
 }
 
 // Hook options
@@ -56,17 +62,25 @@ export function useContractDashboardStats(options: UseContractStatsOptions = {})
   const { autoFetch = true, refreshInterval, cacheKey } = options;
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<EnhancedError | null>(null);
+  const [userMessage, setUserMessage] = useState<string | null>(null);
   
   const contractStatsService = useRef(new ContractStatsService()).current;
   const cache = useRef(new Map<string, { data: DashboardStats; timestamp: number }>()).current;
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
 
+  const createErrorContext = useCallback((): ErrorContext => ({
+    component: 'useContractDashboardStats',
+    action: 'fetchStats',
+    metadata: { cacheKey, autoFetch, refreshInterval }
+  }), [cacheKey, autoFetch, refreshInterval]);
+
   const fetchStats = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
+      setUserMessage(null);
 
       // Check cache first
       const key = cacheKey || 'dashboard-stats';
@@ -85,13 +99,18 @@ export function useContractDashboardStats(options: UseContractStatsOptions = {})
       cache.set(key, { data: result, timestamp: now });
       setStats(result);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to fetch contract statistics');
-      setError(error);
-      console.error('Error fetching contract stats:', error);
+      const context = createErrorContext();
+      const enhancedError = errorService.handleError(err as Error, context);
+      
+      setError(enhancedError);
+      setUserMessage(errorService.formatErrorMessage(enhancedError));
+      
+      // Log the error
+      errorService.logError(enhancedError);
     } finally {
       setLoading(false);
     }
-  }, [contractStatsService, cache, cacheKey]);
+  }, [contractStatsService, cache, cacheKey, createErrorContext]);
 
   const refresh = useCallback(async () => {
     // Clear cache and refetch
@@ -102,6 +121,11 @@ export function useContractDashboardStats(options: UseContractStatsOptions = {})
     }
     await fetchStats();
   }, [fetchStats, cache, cacheKey]);
+
+  const clearError = useCallback(() => {
+    setError(null);
+    setUserMessage(null);
+  }, []);
 
   // Set up auto-refresh interval
   useEffect(() => {
@@ -137,8 +161,10 @@ export function useContractDashboardStats(options: UseContractStatsOptions = {})
     stats,
     loading,
     error,
+    userMessage,
     refetch: fetchStats,
     refresh,
+    clearError,
   };
 }
 
@@ -227,7 +253,7 @@ export function useContractAnalytics(): UseContractAnalyticsResult {
 export function useMonthlyRevenue(contracts?: Contract[]): UseMonthlyRevenueResult {
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<EnhancedError | null>(null);
   
   const contractStatsService = useRef(new ContractStatsService()).current;
 
@@ -245,9 +271,9 @@ export function useMonthlyRevenue(contracts?: Contract[]): UseMonthlyRevenueResu
       const revenue = calculateRevenue(contracts);
       setMonthlyRevenue(revenue);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to calculate monthly revenue');
-      setError(error);
-      console.error('Error calculating monthly revenue:', error);
+      const enhancedError = errorService.handleError(err as Error);
+      setError(enhancedError);
+      console.error('Error calculating monthly revenue:', enhancedError);
     } finally {
       setLoading(false);
     }

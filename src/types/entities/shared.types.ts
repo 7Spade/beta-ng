@@ -65,16 +65,16 @@ export interface QueryResult<T> {
   count: number;
 }
 
-// Common error types
-export interface ValidationError {
-  field: string;
-  message: string;
-  code: string;
-}
+// Common error types (moved to error.types.ts)
+// ValidationError is now defined in error.types.ts
 
 export interface OperationResult<T = void> {
   success: boolean;
   data?: T;
   error?: string;
-  validationErrors?: ValidationError[];
+  validationErrors?: Array<{
+    field: string;
+    message: string;
+    code: string;
+  }>;
 }

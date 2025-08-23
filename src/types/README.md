@@ -23,3 +23,5 @@ import { RepositoryInterface } from '@/types/services';
 - 避免使用 `any` 型別
 - 優先使用介面而非型別別名
 - 保持型別定義的簡潔性和可讀性
+
+

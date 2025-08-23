@@ -24,3 +24,5 @@ import { validateEmail, validateRequired } from '@/utils/validation';
 - 包含適當的錯誤處理
 - 保持函數的單一職責原則
 - 提供清晰的函數命名和參數說明
+
+
