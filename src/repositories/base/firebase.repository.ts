@@ -30,7 +30,7 @@ import { IFirebaseRepository, FirebaseBatch } from '../../types/services/reposit
  * Firebase Firestore Repository 實作
  * 提供 Firestore 特定的資料存取方法
  */
-export abstract class FirebaseRepository<T extends BaseEntity, ID = string> 
+export abstract class FirebaseRepository<T extends BaseEntity, ID extends string = string> 
   extends BaseRepository<T, ID> 
   implements IFirebaseRepository<T, ID> {
 
@@ -41,11 +41,11 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
    */
   async findById(id: ID): Promise<T | null> {
     try {
-      const docRef = doc(db, this.collectionName, id as string);
+      const docRef = doc(db, this.collectionName, id);
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        return this.mapDocumentToEntity(docSnap);
+        return this.mapDocumentToEntity(docSnap as QueryDocumentSnapshot<T>);
       }
       
       return null;
@@ -60,9 +60,10 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
   async findAll(): Promise<T[]> {
     try {
       const collectionRef = collection(db, this.collectionName);
-      const querySnapshot = await getDocs(collectionRef);
+      const q = query(collectionRef as any); // Cast to any to satisfy the type
+      const querySnapshot = await getDocs(q);
       
-      return querySnapshot.docs.map(doc => this.mapDocumentToEntity(doc));
+      return querySnapshot.docs.map(doc => this.mapDocumentToEntity(doc as QueryDocumentSnapshot<T>));
     } catch (error) {
       this.handleError(error, `find all ${this.collectionName}`);
     }
@@ -86,7 +87,7 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
       const q = query(collectionRef, ...constraints);
       const querySnapshot = await getDocs(q);
       
-      return querySnapshot.docs.map(doc => this.mapDocumentToEntity(doc));
+      return querySnapshot.docs.map(doc => this.mapDocumentToEntity(doc as QueryDocumentSnapshot<T>));
     } catch (error) {
       this.handleError(error, `find ${this.collectionName} by criteria`);
     }
@@ -124,7 +125,7 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
       const q = query(collectionRef, ...constraints);
       const querySnapshot = await getDocs(q);
       
-      const data = querySnapshot.docs.map(doc => this.mapDocumentToEntity(doc));
+      const data = querySnapshot.docs.map(doc => this.mapDocumentToEntity(doc as QueryDocumentSnapshot<T>));
       const totalPages = Math.ceil(total / pageLimit);
 
       return {
@@ -168,7 +169,7 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
       const q = query(collectionRef, ...constraints);
       const querySnapshot = await getDocs(q);
       
-      return querySnapshot.docs.map(doc => this.mapDocumentToEntity(doc));
+      return querySnapshot.docs.map(doc => this.mapDocumentToEntity(doc as QueryDocumentSnapshot<T>));
     } catch (error) {
       this.handleError(error, `query ${this.collectionName}`);
     }
@@ -179,17 +180,17 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
    */
   async create(entity: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
     try {
-      this.validateEntity(entity);
+      this.validateEntity(entity as Partial<T>);
       
       const collectionRef = collection(db, this.collectionName);
       const preparedData = this.prepareCreateData(entity);
-      const firestoreData = this.mapEntityToFirestore(preparedData);
+      const firestoreData = this.mapEntityToFirestore(preparedData as Partial<T>);
       
       const docRef = await addDoc(collectionRef, firestoreData);
       
       // 取得建立的文件
       const docSnap = await getDoc(docRef);
-      return this.mapDocumentToEntity(docSnap);
+      return this.mapDocumentToEntity(docSnap as DocumentSnapshot<T>);
     } catch (error) {
       this.handleError(error, `create ${this.collectionName}`);
     }
@@ -200,7 +201,7 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
    */
   async update(id: ID, updates: Partial<T>): Promise<T> {
     try {
-      const docRef = doc(db, this.collectionName, id as string);
+      const docRef = doc(db, this.collectionName, id);
       
       // 檢查文件是否存在
       const docSnap = await getDoc(docRef);
@@ -215,7 +216,7 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
       
       // 取得更新後的文件
       const updatedDocSnap = await getDoc(docRef);
-      return this.mapDocumentToEntity(updatedDocSnap);
+      return this.mapDocumentToEntity(updatedDocSnap as DocumentSnapshot<T>);
     } catch (error) {
       this.handleError(error, `update ${this.collectionName} with id ${id}`);
     }
@@ -226,7 +227,7 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
    */
   async delete(id: ID): Promise<void> {
     try {
-      const docRef = doc(db, this.collectionName, id as string);
+      const docRef = doc(db, this.collectionName, id);
       
       // 檢查文件是否存在
       const docSnap = await getDoc(docRef);
@@ -250,9 +251,9 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
       const docRefs: any[] = [];
 
       entities.forEach(entity => {
-        this.validateEntity(entity);
+        this.validateEntity(entity as Partial<T>);
         const preparedData = this.prepareCreateData(entity);
-        const firestoreData = this.mapEntityToFirestore(preparedData);
+        const firestoreData = this.mapEntityToFirestore(preparedData as Partial<T>);
         const docRef = doc(collectionRef);
         batch.set(docRef, firestoreData);
         docRefs.push(docRef);
@@ -264,7 +265,7 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
       const createdEntities: T[] = [];
       for (const docRef of docRefs) {
         const docSnap = await getDoc(docRef);
-        createdEntities.push(this.mapDocumentToEntity(docSnap));
+        createdEntities.push(this.mapDocumentToEntity(docSnap as DocumentSnapshot<T>));
       }
 
       return createdEntities;
@@ -281,7 +282,7 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
       const batch = writeBatch(db);
 
       updates.forEach(({ id, data }) => {
-        const docRef = doc(db, this.collectionName, id as string);
+        const docRef = doc(db, this.collectionName, id);
         const preparedUpdates = this.prepareUpdateData(data);
         const firestoreUpdates = this.mapEntityToFirestore(preparedUpdates);
         batch.update(docRef, firestoreUpdates);
@@ -312,7 +313,7 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
       const batch = writeBatch(db);
 
       ids.forEach(id => {
-        const docRef = doc(db, this.collectionName, id as string);
+        const docRef = doc(db, this.collectionName, id);
         batch.delete(docRef);
       });
 
@@ -327,7 +328,7 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
    */
   async exists(id: ID): Promise<boolean> {
     try {
-      const docRef = doc(db, this.collectionName, id as string);
+      const docRef = doc(db, this.collectionName, id);
       const docSnap = await getDoc(docRef);
       return docSnap.exists();
     } catch (error) {
@@ -368,7 +369,7 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
     const collectionRef = collection(db, this.collectionName);
     
     return onSnapshot(collectionRef, (snapshot) => {
-      const entities = snapshot.docs.map(doc => this.mapDocumentToEntity(doc));
+      const entities = snapshot.docs.map(doc => this.mapDocumentToEntity(doc as QueryDocumentSnapshot<T>));
       callback(entities);
     }, (error) => {
       console.error(`Subscription error for ${this.collectionName}:`, error);
@@ -379,11 +380,11 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
    * 訂閱單一實體變更
    */
   subscribeById(id: ID, callback: (entity: T | null) => void): Unsubscribe {
-    const docRef = doc(db, this.collectionName, id as string);
+    const docRef = doc(db, this.collectionName, id);
     
     return onSnapshot(docRef, (snapshot) => {
       if (snapshot.exists()) {
-        const entity = this.mapDocumentToEntity(snapshot);
+        const entity = this.mapDocumentToEntity(snapshot as DocumentSnapshot<T>);
         callback(entity);
       } else {
         callback(null);
@@ -409,7 +410,7 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
     const q = query(collectionRef, ...constraints);
     
     return onSnapshot(q, (snapshot) => {
-      const entities = snapshot.docs.map(doc => this.mapDocumentToEntity(doc));
+      const entities = snapshot.docs.map(doc => this.mapDocumentToEntity(doc as QueryDocumentSnapshot<T>));
       callback(entities);
     }, (error) => {
       console.error(`Query subscription error for ${this.collectionName}:`, error);
@@ -426,15 +427,15 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
   /**
    * 將 Firestore 文件映射為實體
    */
-  protected mapDocumentToEntity(doc: DocumentSnapshot | QueryDocumentSnapshot): T {
+  protected mapDocumentToEntity(doc: DocumentSnapshot<T> | QueryDocumentSnapshot<T>): T {
     const data = doc.data();
     if (!data) {
       throw new Error(`No data found in document ${doc.id}`);
     }
 
     return {
-      id: doc.id,
       ...this.mapFirestoreToEntity(data),
+      id: doc.id,
     } as T;
   }
 
@@ -460,7 +461,7 @@ export abstract class FirebaseRepository<T extends BaseEntity, ID = string>
    * 將 Firestore 資料映射為實體
    * 子類別可以覆寫此方法來處理特殊的資料轉換
    */
-  protected mapFirestoreToEntity(data: any): Partial<T> {
+  protected mapFirestoreToEntity(data: DocumentData): Partial<T> {
     const entityData = { ...data };
     
     // 轉換 Firestore Timestamp 為 Date
@@ -483,7 +484,7 @@ class FirebaseBatchImpl<T extends BaseEntity> implements FirebaseBatch<T> {
 
   constructor(
     private collectionName: string,
-    private repository: FirebaseRepository<T>
+    private repository: FirebaseRepository<T, string>
   ) {}
 
   create(entity: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): FirebaseBatch<T> {

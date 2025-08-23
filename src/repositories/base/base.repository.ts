@@ -5,7 +5,7 @@ import { IBaseRepository, QueryOptions, WhereClause } from '../../types/services
  * 抽象基礎 Repository 類別
  * 提供通用的資料存取方法定義
  */
-export abstract class BaseRepository<T extends BaseEntity, ID = string> implements IBaseRepository<T, ID> {
+export abstract class BaseRepository<T extends BaseEntity, ID extends string = string> implements IBaseRepository<T, ID> {
   protected abstract collectionName: string;
 
   /**
