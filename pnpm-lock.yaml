@@ -162,6 +162,9 @@ importers:
       genkit-cli:
         specifier: ^1.17.0
         version: 1.17.0(@types/node@20.19.11)
+      jest:
+        specifier: ^30.0.5
+        version: 30.0.5(@types/node@20.19.11)
       postcss:
         specifier: ^8
         version: 8.5.6
