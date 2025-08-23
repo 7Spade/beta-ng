@@ -4,4 +4,5 @@
  */
 
 export * from './contract.service.types';
+export * from './project.service.types';
 export * from './repository.types';

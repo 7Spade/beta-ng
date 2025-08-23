@@ -1,9 +1,11 @@
 "use server";
 
-import { db } from "@/lib/firebase";
-import { writeBatch, collection, doc, Timestamp } from "firebase/firestore";
-import type { Task, Project, Contract } from "@/lib/types";
+import type { Task } from "@/types/entities/project.types";
 import type { WorkItem } from "@/components/features/documents/work-items-table";
+import { contractService } from "@/services/contracts/contract.service";
+import { projectService } from "@/services/projects/project.service";
+import { CreateContractDto } from "@/types/dto/contract.dto";
+import { CreateProjectFromDocumentDto } from "@/types/dto/project.dto";
 
 interface DocDetails {
     customId: string;
@@ -28,45 +30,41 @@ function workItemsToTasks(items: WorkItem[]): Task[] {
     return items.map((item, index) => ({
         id: `task-${Date.now()}-${index}`,
         title: item.item,
-        status: '待處理',
+        status: '待處理' as const,
         lastUpdated: new Date().toISOString(),
         quantity: item.quantity,
         unitPrice: item.unitPrice,
         value: item.price,
-        subTasks: [],
+        subTasks: []
     }));
 }
 
 export async function createProjectAndContractFromDocument(input: ActionInput): Promise<ActionResult> {
     const { docDetails, workItems } = input;
-    const batch = writeBatch(db);
 
     try {
-        // 1. Prepare Project data
-        const newProjectRef = doc(collection(db, "projects"));
-        const projectId = newProjectRef.id;
-        const totalValue = workItems.reduce((sum, item) => sum + item.price, 0);
+        const totalValue = workItems.reduce((sum: number, item: WorkItem) => sum + item.price, 0);
         const tasks = workItemsToTasks(workItems);
+        const startDate = new Date();
+        const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 1 month from now
 
-        const projectData: Omit<Project, "id" | "startDate" | "endDate"> & { startDate: Timestamp, endDate: Timestamp } = {
+        // 1. Create Project using ProjectService
+        const projectData: CreateProjectFromDocumentDto = {
             customId: docDetails.customId,
             title: docDetails.name,
             description: `從文件 "${docDetails.name}" 建立的專案`,
             client: docDetails.client,
             clientRepresentative: docDetails.clientRepresentative,
-            value: totalValue,
             tasks: tasks,
-            startDate: Timestamp.now(),
-            // Placeholder end date, maybe 1 month from now
-            endDate: Timestamp.fromDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
+            totalValue: totalValue,
+            startDate: startDate,
+            endDate: endDate,
         };
-        batch.set(newProjectRef, projectData);
 
-        // 2. Prepare Contract data
-        const newContractRef = doc(collection(db, "contracts"));
-        const contractId = newContractRef.id;
+        const createdProject = await projectService.createProjectFromDocument(projectData);
 
-        const contractData: Omit<Contract, "id" | "startDate" | "endDate" | "payments" | "changeOrders" | "versions"> & { startDate: Timestamp, endDate: Timestamp, payments: [], changeOrders: [], versions: any[] } = {
+        // 2. Create Contract using ContractService
+        const contractData: CreateContractDto = {
             customId: docDetails.customId,
             name: docDetails.name,
             contractor: "本公司", // Placeholder value
@@ -75,22 +73,18 @@ export async function createProjectAndContractFromDocument(input: ActionInput): 
             totalValue: totalValue,
             status: "啟用中",
             scope: `基於文件 "${docDetails.name}" 的工作項目。`,
-            startDate: projectData.startDate,
-            endDate: projectData.endDate,
+            startDate: startDate,
+            endDate: endDate,
             payments: [],
-            changeOrders: [],
-            versions: [{
-                version: 1,
-                date: Timestamp.now(),
-                changeSummary: "從文件提取的初始版本"
-            }]
+            changeOrders: []
         };
-        batch.set(newContractRef, contractData);
 
-        // Commit the batch
-        await batch.commit();
+        const createdContract = await contractService.createContract(contractData);
 
-        return { projectId, contractId };
+        return { 
+            projectId: createdProject.id, 
+            contractId: createdContract.id 
+        };
 
     } catch (e) {
         console.error("從文件建立專案和合約時發生錯誤：", e);

@@ -1,2 +1,6 @@
-// Project repository exports
-export * from './project.repository';
+/**
+ * Project Repository Module Exports
+ */
+
+export { ProjectRepository } from './project.repository';
+export type { IProjectRepository } from './project.repository';

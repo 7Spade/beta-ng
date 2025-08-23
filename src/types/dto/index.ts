@@ -4,3 +4,4 @@
  */
 
 export * from './contract.dto';
+export * from './project.dto';
