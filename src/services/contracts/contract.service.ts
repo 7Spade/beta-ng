@@ -7,11 +7,17 @@ import { Contract, ContractFilters } from '../../types/entities/contract.types';
 import { CreateContractDto, UpdateContractDto } from '../../types/dto/contract.dto';
 import {
   IContractService,
-  ValidationResult,
-  ValidationError,
   DashboardStats,
   ExportOptions,
 } from '../../types/services/contract.service.types';
+import { 
+  ValidationResult, 
+  ValidationError,
+  validateCreateContract,
+  validateUpdateContract,
+  validateStatusTransition,
+  validateContractBusinessRules
+} from '../../utils/validation';
 import { ContractRepository } from '../../repositories/contracts/contract.repository';
 import { ContractStatsService } from './contract-stats.service';
 import { ContractExportService } from './contract-export.service';
@@ -163,115 +169,37 @@ export class ContractService implements IContractService {
    * Validate contract data
    */
   validateContract(contract: Partial<Contract>): ValidationResult {
-    const errors: ValidationError[] = [];
-
-    // Required fields validation
-    if (!contract.name || contract.name.trim().length === 0) {
-      errors.push({
-        field: 'name',
-        message: 'Contract name is required',
-        code: 'REQUIRED_FIELD'
-      });
+    // Use the validation utilities for comprehensive validation
+    if (this.isCreateContractDto(contract)) {
+      const createValidation = validateCreateContract(contract);
+      const businessValidation = validateContractBusinessRules(contract);
+      
+      return {
+        isValid: createValidation.isValid && businessValidation.isValid,
+        errors: [...createValidation.errors, ...businessValidation.errors]
+      };
+    } else {
+      const updateValidation = validateUpdateContract(contract as UpdateContractDto);
+      const businessValidation = validateContractBusinessRules(contract);
+      
+      return {
+        isValid: updateValidation.isValid && businessValidation.isValid,
+        errors: [...updateValidation.errors, ...businessValidation.errors]
+      };
     }
+  }
 
-    if (!contract.contractor || contract.contractor.trim().length === 0) {
-      errors.push({
-        field: 'contractor',
-        message: 'Contractor is required',
-        code: 'REQUIRED_FIELD'
-      });
-    }
-
-    if (!contract.client || contract.client.trim().length === 0) {
-      errors.push({
-        field: 'client',
-        message: 'Client is required',
-        code: 'REQUIRED_FIELD'
-      });
-    }
-
-    if (!contract.startDate) {
-      errors.push({
-        field: 'startDate',
-        message: 'Start date is required',
-        code: 'REQUIRED_FIELD'
-      });
-    }
-
-    if (!contract.endDate) {
-      errors.push({
-        field: 'endDate',
-        message: 'End date is required',
-        code: 'REQUIRED_FIELD'
-      });
-    }
-
-    if (contract.totalValue === undefined || contract.totalValue === null) {
-      errors.push({
-        field: 'totalValue',
-        message: 'Total value is required',
-        code: 'REQUIRED_FIELD'
-      });
-    }
-
-    if (!contract.scope || contract.scope.trim().length === 0) {
-      errors.push({
-        field: 'scope',
-        message: 'Contract scope is required',
-        code: 'REQUIRED_FIELD'
-      });
-    }
-
-    // Business logic validation
-    if (contract.startDate && contract.endDate) {
-      if (contract.startDate >= contract.endDate) {
-        errors.push({
-          field: 'endDate',
-          message: 'End date must be after start date',
-          code: 'INVALID_DATE_RANGE'
-        });
-      }
-    }
-
-    if (contract.totalValue !== undefined && contract.totalValue < 0) {
-      errors.push({
-        field: 'totalValue',
-        message: 'Total value must be non-negative',
-        code: 'INVALID_VALUE'
-      });
-    }
-
-    // Name length validation
-    if (contract.name && contract.name.length > 200) {
-      errors.push({
-        field: 'name',
-        message: 'Contract name must be less than 200 characters',
-        code: 'FIELD_TOO_LONG'
-      });
-    }
-
-    // Scope length validation
-    if (contract.scope && contract.scope.length > 2000) {
-      errors.push({
-        field: 'scope',
-        message: 'Contract scope must be less than 2000 characters',
-        code: 'FIELD_TOO_LONG'
-      });
-    }
-
-    // Custom ID validation (if provided)
-    if (contract.customId && contract.customId.length > 50) {
-      errors.push({
-        field: 'customId',
-        message: 'Custom ID must be less than 50 characters',
-        code: 'FIELD_TOO_LONG'
-      });
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
+  /**
+   * Type guard to check if contract data is for creation
+   */
+  private isCreateContractDto(contract: Partial<Contract>): contract is CreateContractDto {
+    return contract.name !== undefined && 
+           contract.contractor !== undefined && 
+           contract.client !== undefined &&
+           contract.startDate !== undefined &&
+           contract.endDate !== undefined &&
+           contract.totalValue !== undefined &&
+           contract.scope !== undefined;
   }
 
   /**
@@ -419,18 +347,11 @@ export class ContractService implements IContractService {
    * Validate status transition
    */
   private validateStatusTransition(currentStatus: Contract['status'], newStatus: Contract['status']): void {
-    // Define valid status transitions
-    const validTransitions: Record<Contract['status'], Contract['status'][]> = {
-      '啟用中': ['已完成', '暫停中', '已終止'],
-      '暫停中': ['啟用中', '已終止'],
-      '已完成': [], // Completed contracts cannot change status
-      '已終止': [], // Terminated contracts cannot change status
-    };
-
-    const allowedTransitions = validTransitions[currentStatus];
+    const validationResult = validateStatusTransition(currentStatus, newStatus);
     
-    if (!allowedTransitions.includes(newStatus)) {
-      throw new Error(`Invalid status transition from ${currentStatus} to ${newStatus}`);
+    if (!validationResult.isValid) {
+      const errorMessages = validationResult.errors.map(error => error.message).join(', ');
+      throw new Error(`Invalid status transition: ${errorMessages}`);
     }
   }
 }
