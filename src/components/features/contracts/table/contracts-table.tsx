@@ -76,11 +76,11 @@ export function ContractsTable({ contracts: initialContracts }: ContractsTablePr
   // Update total count and process contracts through table state management
   React.useEffect(() => {
     tableState.updateTotal(initialContracts);
-  }, [initialContracts, tableState]);
+  }, [initialContracts]); // Remove tableState from dependencies to prevent infinite loops
   
   const processedContracts = React.useMemo(() => 
     tableState.getProcessedData(initialContracts), 
-    [tableState, initialContracts]
+    [initialContracts] // Remove tableState from dependencies to prevent infinite loops
   );
 
   return (

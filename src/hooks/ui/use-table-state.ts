@@ -490,10 +490,10 @@ export function useTableState<T = any>(options: UseTableStateOptions<T> = {}): U
 
     // Combined
     getProcessedData,
-    updateTotal: (data: T[]) => {
+    updateTotal: useCallback((data: T[]) => {
       const filteredData = getFilteredData(data);
       setPaginationState(prev => ({ ...prev, total: filteredData.length }));
-    },
+    }, [getFilteredData]),
     reset,
   };
 }

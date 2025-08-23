@@ -354,7 +354,7 @@ export function ContractProvider({
 
   const refreshContracts = useCallback(async (): Promise<void> => {
     await loadContracts(state.filters);
-  }, [loadContracts]);
+  }, [loadContracts, state.filters]);
 
   const loadStats = useCallback(async (): Promise<void> => {
     await handleAsyncOperation('loadStats', async () => {
@@ -452,7 +452,7 @@ export function ContractProvider({
       
       initialLoad();
     }
-  }, [autoLoad, initialFilters]); // Include initialFilters but ensure it's stable
+  }, [autoLoad]); // Remove initialFilters and loadContracts from dependencies to prevent infinite loops
 
   const contextValue: ContractContextValue = {
     // State

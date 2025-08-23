@@ -66,7 +66,7 @@ export function AiSummarizerDialog() {
     } catch (e: any) {
       const errorMessage = e.message || '發生未知錯誤。';
       setError(errorMessage);
-       toast({
+      toast({
         variant: "destructive",
         title: "摘要生成失敗",
         description: errorMessage,
@@ -82,15 +82,15 @@ export function AiSummarizerDialog() {
     setSummary('');
     setError('');
     setIsLoading(false);
-    if(fileInputRef.current) {
-        fileInputRef.current.value = '';
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   }
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
-    if(!open) {
-        resetState();
+    if (!open) {
+      resetState();
     }
   }
 
@@ -111,16 +111,16 @@ export function AiSummarizerDialog() {
           <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label htmlFor="contract-file">合約文件</Label>
             <div className="flex items-center gap-2">
-                <Input id="contract-file" type="file" ref={fileInputRef} onChange={handleFileChange} accept=".pdf,.doc,.docx" />
-                {file && <span className="text-sm text-muted-foreground truncate">{file.name}</span>}
+              <Input id="contract-file" type="file" ref={fileInputRef} onChange={handleFileChange} accept=".pdf,.doc,.docx" />
+              {file && <span className="text-sm text-muted-foreground truncate">{file.name}</span>}
             </div>
           </div>
           {isLoading && (
             <div className="space-y-2">
-                <Skeleton className="h-4 w-1/3" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
             </div>
           )}
           {summary && (

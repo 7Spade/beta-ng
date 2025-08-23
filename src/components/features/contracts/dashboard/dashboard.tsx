@@ -48,7 +48,7 @@ export function ContractDashboard() {
     if (!dashboardStats) {
       loadDashboardStats();
     }
-  }, [dashboardStats]); // Remove loadDashboardStats from dependencies to prevent infinite loops
+  }, [dashboardStats, loadDashboardStats]); // Include loadDashboardStats but it should be stable from useCallback
 
   if (loading) {
     return (
