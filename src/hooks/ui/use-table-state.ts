@@ -394,14 +394,13 @@ export function useTableState<T = any>(options: UseTableStateOptions<T> = {}): U
       // Apply filters
       processedData = getFilteredData(processedData);
       
-      // Update total count for pagination
-      setPaginationState(prev => ({ ...prev, total: processedData.length }));
-      
       // Apply sorting
       processedData = getSortedData(processedData);
       
-      // Apply pagination
-      processedData = getPaginatedData(processedData);
+      // Apply pagination (without updating state)
+      const startIndex = (pagination.page - 1) * pagination.pageSize;
+      const endIndex = startIndex + pagination.pageSize;
+      processedData = processedData.slice(startIndex, endIndex);
       
       return processedData;
     } catch (err) {
@@ -490,6 +489,10 @@ export function useTableState<T = any>(options: UseTableStateOptions<T> = {}): U
     
     // Combined
     getProcessedData,
+    updateTotal: (data: T[]) => {
+      const filteredData = getFilteredData(data);
+      setPaginationState(prev => ({ ...prev, total: filteredData.length }));
+    },
     reset,
   };
 }

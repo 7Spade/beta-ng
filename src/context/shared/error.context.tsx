@@ -3,6 +3,8 @@
  * Provides global error state management and user-friendly error handling
  */
 
+'use client';
+
 import React, { createContext, useContext, useReducer, useCallback, ReactNode } from 'react';
 import { EnhancedError, ErrorContext as ErrorContextType } from '../../types/entities/error.types';
 import { errorService } from '../../services/shared/error.service';

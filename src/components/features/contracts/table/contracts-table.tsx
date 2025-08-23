@@ -73,7 +73,11 @@ export function ContractsTable({ contracts: initialContracts }: ContractsTablePr
     }
   };
 
-  // Process contracts through table state management
+  // Update total count and process contracts through table state management
+  React.useEffect(() => {
+    tableState.updateTotal(initialContracts);
+  }, [initialContracts, tableState]);
+  
   const processedContracts = tableState.getProcessedData(initialContracts);
 
   return (

@@ -3,6 +3,8 @@
  * High-level provider component that combines contract context with error handling
  */
 
+'use client';
+
 import React, { ReactNode } from 'react';
 import { ContractProvider as BaseContractProvider, ContractProviderProps } from './contract.context';
 import { ErrorProvider } from '../shared/error.context';

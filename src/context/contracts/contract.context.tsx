@@ -3,6 +3,8 @@
  * Provides global contract state management and operations
  */
 
+'use client';
+
 import React, { createContext, useContext, useReducer, useCallback, ReactNode, useRef } from 'react';
 import { Contract, ContractFilters, ContractStats } from '../../types/entities/contract.types';
 import { CreateContractDto, UpdateContractDto } from '../../types/dto/contract.dto';
