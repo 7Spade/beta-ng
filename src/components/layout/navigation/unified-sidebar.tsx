@@ -3,7 +3,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   Sidebar,
   SidebarHeader,
@@ -28,30 +28,47 @@ export function UnifiedSidebar({ className, ...props }: UnifiedSidebarProps) {
   const pathname = usePathname()
   const [expandedSections, setExpandedSections] = useState<string[]>([])
 
-  useEffect(() => {
-    const sectionsToExpand = navigationConfig
+  // Memoize the sections that should be expanded to prevent unnecessary recalculations
+  const sectionsToExpand = useMemo(() => {
+    return navigationConfig
       .filter(item => item.children && shouldExpandSection(item.id, pathname))
       .map(item => item.id)
-
-    setExpandedSections(prev => {
-      const newExpanded = new Set([...prev, ...sectionsToExpand])
-      return Array.from(newExpanded)
-    })
   }, [pathname])
 
-  const toggleSection = (sectionId: string) => {
+  // Use useCallback to prevent the effect from running unnecessarily
+  const updateExpandedSections = useCallback(() => {
+    setExpandedSections(prev => {
+      // Only update if there are actual changes to prevent infinite loops
+      const newExpanded = new Set([...prev, ...sectionsToExpand])
+      const newArray = Array.from(newExpanded)
+      
+      // Check if the arrays are actually different to prevent unnecessary updates
+      if (prev.length === newArray.length && 
+          prev.every((item, index) => item === newArray[index])) {
+        return prev // Return the same reference if no changes
+      }
+      
+      return newArray
+    })
+  }, [sectionsToExpand])
+
+  useEffect(() => {
+    updateExpandedSections()
+  }, [updateExpandedSections])
+
+  const toggleSection = useCallback((sectionId: string) => {
     setExpandedSections(prev =>
       prev.includes(sectionId)
         ? prev.filter(id => id !== sectionId)
         : [...prev, sectionId]
     )
-  }
+  }, [])
 
-  const isRouteActive = (href: string) =>
-    pathname === href || pathname.startsWith(`${href}/`)
+  const isRouteActive = useCallback((href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`), [pathname])
 
-  const isSectionExpanded = (sectionId: string) =>
-    expandedSections.includes(sectionId)
+  const isSectionExpanded = useCallback((sectionId: string) =>
+    expandedSections.includes(sectionId), [expandedSections])
 
   return (
     <Sidebar className={className} {...props}>

@@ -1,3 +1,4 @@
+│  README.md
 │  setupTests.ts
 │
 ├─ai
@@ -87,6 +88,8 @@
 │  │  README.md
 │  │
 │  ├─features
+│  │  │  README.md
+│  │  │
 │  │  ├─analytics
 │  │  │  │  README.md
 │  │  │  │
@@ -105,8 +108,8 @@
 │  │  │
 │  │  ├─contracts
 │  │  │  │  ai-summarizer-dialog.tsx
+│  │  │  │  API.md
 │  │  │  │  contracts-details-sheet.tsx
-│  │  │  │  contracts-table.tsx
 │  │  │  │  create-contract-dialog.tsx
 │  │  │  │  dashboard-stats.tsx
 │  │  │  │  README.md
@@ -285,6 +288,12 @@
 │  │  README.md
 │  │
 │  ├─contracts
+│  │  │  CONTEXT_INTEGRATION_SUMMARY.md
+│  │  │  contract.context.tsx
+│  │  │  contract.provider.tsx
+│  │  │  index.ts
+│  │  │
+│  │  └─__tests__
 │  ├─projects
 │  └─shared
 │          app.context.tsx
@@ -297,6 +306,8 @@
 │      structure.md
 │
 ├─hooks
+│  │  ERROR_HANDLING_INTEGRATION.md
+│  │  ERROR_HANDLING_INTEGRATION_SUMMARY.md
 │  │  index.ts
 │  │  README.md
 │  │  use-mobile.tsx
@@ -313,12 +324,17 @@
 │  │      README.md
 │  │      use-contracts.ts
 │  │
-│  └─ui
-│          index.ts
-│          README.md
-│          use-error-handling.ts
-│          use-form-state.ts
-│          use-table-state.ts
+│  ├─ui
+│  │      index.ts
+│  │      README.md
+│  │      use-error-handling.ts
+│  │      use-form-state.ts
+│  │      use-hook-error-integration.ts
+│  │      use-table-state.ts
+│  │
+│  └─__tests__
+│          error-integration.test.ts
+│          ERROR_FIXES_SUMMARY.md
 │
 ├─lib
 │      firebase.ts
@@ -384,6 +400,7 @@
 │      │  error.service.ts
 │      │  export.service.ts
 │      │  index.ts
+│      │  README-validation-service.md
 │      │  README.md
 │      │  validation.service.ts
 │      │

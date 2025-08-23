@@ -48,7 +48,7 @@ export function ContractDashboard() {
     if (!dashboardStats) {
       loadDashboardStats();
     }
-  }, [dashboardStats, loadDashboardStats]);
+  }, [dashboardStats]); // Remove loadDashboardStats from dependencies to prevent infinite loops
 
   if (loading) {
     return (

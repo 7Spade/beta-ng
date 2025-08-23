@@ -441,9 +441,18 @@ export function ContractProvider({
   // Auto-load contracts on mount
   React.useEffect(() => {
     if (autoLoad) {
-      loadContracts(initialFilters);
+      // Use a ref to track if this is the initial load to prevent infinite loops
+      const initialLoad = async () => {
+        try {
+          await loadContracts(initialFilters);
+        } catch (error) {
+          console.error('Failed to load initial contracts:', error);
+        }
+      };
+      
+      initialLoad();
     }
-  }, [autoLoad]); // Remove loadContracts and initialFilters from dependencies to prevent infinite loop
+  }, [autoLoad, initialFilters]); // Include initialFilters but ensure it's stable
 
   const contextValue: ContractContextValue = {
     // State
